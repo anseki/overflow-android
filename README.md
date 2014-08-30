@@ -40,7 +40,7 @@ element.scrollLeft = 30;
 ## Constructor
 
 ```js
-overflowA = new OverflowAndroid(viewElement);
+overflowA = new OverflowAndroid(viewElement)
 ```
 
 The `OverflowAndroid` constructor accepts a element that is scrolling frame. It get first child element that includes contents and it moves when scrolling. The specified element like an `iframe` window, and the first child element like an `iframe` document.  
