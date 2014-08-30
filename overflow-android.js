@@ -18,7 +18,8 @@
     positionOffset  : {left: N, top: N} margin of elmContents
     startPoint      : {clientX: N, clientY: N} start point of cursor
     startScroll     : {left: N, top: N} start scroll value
-    inertia         : {intervalTime: N, x: {velocity: N, direction: -1 | 1}, y: SAME} velocity: px/ms
+    inertia         : {intervalTime: N,
+                        x: {velocity: N, direction: -1 | 1, friction: N}, y: SAME} velocity: px/ms
     timer           : timer ID
     hammer          : Hammer.Manager
     enable
@@ -75,7 +76,10 @@ function OverflowAndroid(target) {
 
   // Events
   that.hammer = new Hammer.Manager(that.elmView, {
-    recognizers: [[Hammer.Pan, {threshold: 3}]]
+    recognizers: [
+      [Hammer.Pan, {threshold: 3}]/*,
+      [Hammer.Swipe]*/
+    ]
   })
   .on('panstart', function(e) {
     if (that.timer) { window.clearInterval(that.timer); delete that.timer; }
@@ -92,14 +96,7 @@ function OverflowAndroid(target) {
       that.startPoint.clientX - e.pointers[0].clientX);
     scroll(that, 'top', that.startScroll.top +
       that.startPoint.clientY - e.pointers[0].clientY);
-    e.preventDefault();
-  })
-  .on('panend', function(e) {
-    styleValueDraggable = tryStyle(that.elmView, 'cursor',
-      styleValueDraggable ? [styleValueDraggable] : STYLE_VALUES_DRAGGABLE);
-    document.body.style.cursor = '';
     that.inertia = {
-      intervalTime: (new Date()).getTime(),
       x: {
         velocity: Math.abs(e.velocityX),
         direction: e.velocityX > 0 ? 1 : -1
@@ -109,10 +106,41 @@ function OverflowAndroid(target) {
         direction: e.velocityY > 0 ? 1 : -1
       }
     };
+    e.preventDefault();
+  })
+  .on('panend', function(e) {
+    var inertia = that.inertia, inertiaBase, inertiaAnother;
+    styleValueDraggable = tryStyle(that.elmView, 'cursor',
+      styleValueDraggable ? [styleValueDraggable] : STYLE_VALUES_DRAGGABLE);
+    document.body.style.cursor = '';
+    // inertia = {
+    //   intervalTime: (new Date()).getTime(),
+    //   x: {
+    //     velocity: Math.abs(e.velocityX),
+    //     direction: e.velocityX > 0 ? 1 : -1
+    //   },
+    //   y: {
+    //     velocity: Math.abs(e.velocityY),
+    //     direction: e.velocityY > 0 ? 1 : -1
+    //   }
+    // };
+    if (inertia.x.velocity === inertia.y.velocity) {
+      inertia.x.friction = inertia.y.friction = OverflowAndroid.friction;
+    } else {
+      if (inertia.x.velocity > inertia.y.velocity)
+        { inertiaBase = inertia.x; inertiaAnother = inertia.y; }
+      else { inertiaBase = inertia.y; inertiaAnother = inertia.x; }
+      inertiaBase.friction = OverflowAndroid.friction;
+      inertiaAnother.friction =
+        inertiaAnother.velocity / inertiaBase.velocity * OverflowAndroid.friction;
+    }
+    inertia.intervalTime = (new Date()).getTime();
     that.timer = window.setInterval(function() { inertiaScroll(that); },
       1000 / OverflowAndroid.fps);
     e.preventDefault();
-  });
+  })/*
+  .on('swipe', function(e) {
+  })*/;
 }
 
 OverflowAndroid.prototype.initSize = function() {
@@ -184,14 +212,14 @@ function inertiaScroll(that) {
     passedTime = now - inertia.intervalTime;
 
   function _inertiaScroll(inertiaAxis, scrollDirection) {
-    var newValue, resValue;
-    if (inertia[inertiaAxis].velocity) {
+    var newValue, resValue, axisInertia = inertia[inertiaAxis];
+    if (axisInertia.velocity) {
       newValue = that.scrollValue[scrollDirection] +
-        inertia[inertiaAxis].velocity * inertia[inertiaAxis].direction * passedTime;
+        axisInertia.velocity * axisInertia.direction * passedTime;
       resValue = scroll(that, scrollDirection, newValue);
-      inertia[inertiaAxis].velocity -= OverflowAndroid.friction * passedTime;
-      if (newValue !== resValue || inertia[inertiaAxis].velocity < 0.01)
-        { inertia[inertiaAxis].velocity = 0; }
+      axisInertia.velocity -= axisInertia.friction * passedTime;
+      if (newValue !== resValue || axisInertia.velocity < axisInertia.friction)
+        { axisInertia.velocity = 0; }
     }
   }
   _inertiaScroll('x', 'left');

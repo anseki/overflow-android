@@ -109,4 +109,5 @@ This is strength of slowdown for inertia scroll animation when swipe operation. 
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## Release History
+ * 2014-08-31			v0.1.1			Change inertia scroll animation.
  * 2014-08-30			v0.1.0			Initial release.
