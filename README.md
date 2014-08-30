@@ -53,7 +53,7 @@ NOTE: The contents that is included in specified element other than first child 
 ### `scrollLeft`
 
 ```js
-overflowA.scrollLeft([scrollPosition])
+currentPosition = overflowA.scrollLeft([newPosition])
 ```
 
 Return the number of pixels that the element's content is scrolled to the left. If an argument is given, the element scrolls to specified position and it is returned.  
@@ -62,7 +62,7 @@ This work equals `element.scrollLeft` property.
 ### `scrollTop`
 
 ```js
-overflowA.scrollTop([scrollPosition])
+currentPosition = overflowA.scrollTop([newPosition])
 ```
 
 Return the number of pixels that the element's content is scrolled upward. If an argument is given, the element scrolls to specified position and it is returned.  
