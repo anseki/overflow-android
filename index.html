@@ -44,9 +44,9 @@
 
 <ul>
 <li>
-<code>overflow:scroll</code> and <code>overflow:auto</code> don't work on Android 2.x. The elements don't accept swipe operation.</li>
+<code>overflow:scroll</code> and <code>overflow:auto</code> don't work on Android 2.x. The elements don't accept swipe/flick/drag operation.</li>
 <li>
-<code>element.scrollLeft</code> and <code>element.scrollTop</code> don't work on Android 4.0.x. The elements can't scroll via JavaScript. Strange to say, the element that is set <code>overflow:hidden</code> can scroll. But of course that element doesn't accept swipe operation.</li>
+<code>element.scrollLeft</code> and <code>element.scrollTop</code> don't work on Android 4.0.x. The elements can't scroll via JavaScript. Strange to say, the element that is set <code>overflow:hidden</code> can scroll. But of course that element doesn't accept swipe/flick/drag operation.</li>
 </ul><p>OverflowAndroid solves above problems both.</p>
 
 <p style="font-weight: bold;"><a href="m.html">Test page for mobile</a> is lightweight page. </p>
@@ -55,12 +55,13 @@
 <div id="view"><div id="contents"><img src="images/00.jpg" width="100%" height="100%" alt="sample"></div></div>
 
 <ul>
-  <li>This box accepts swipe operation.</li>
+  <li>This box accepts swipe/flick/drag operation.</li>
   <li>This box can scroll via <code>element.scrollLeft</code> / <code>element.scrollTop</code>. <button id="btn1">element.scrollLeft = 80</button></li>
   <li>This box accepts pinch-in/out (zoom-in/out) operation. It works independent from body.</li>
   <li>If jQuery is loaded, this box can scroll by jQuery animation. <button id="btn2">$(element).animate({ scrollLeft: 360, scrollTop: 150 }, 1200)</button></li>
 </ul>
 <!-- ======== /sample -->
+<p>If you are using jQuery, you can choose jQuery plugin <a href="https://github.com/anseki/jquery-overflow-android">jQuery.overflowAndroid</a>.
 
 <h2>
 <a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
@@ -74,16 +75,14 @@
 
 <div class="highlight highlight-html"><pre><span class="c">&lt;!-- This `overflow:auto` isn't necessary. It works on desktop PC as native. --&gt;</span>
 <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"view"</span> <span class="na">style=</span><span class="s">"overflow: auto; width: 300px; height: 300px;"</span><span class="nt">&gt;</span>  <span class="c">&lt;!-- Like an iframe window --&gt;</span>
-  <span class="nt">&lt;div</span> <span class="na">style=</span><span class="s">"width: 900px; height: 600px;"</span><span class="nt">&gt;</span>                          <span class="c">&lt;!-- Like an iframe document --&gt;</span>
-    <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"photo.jpg"</span> <span class="na">width=</span><span class="s">"900"</span> <span class="na">height=</span><span class="s">"600"</span> <span class="na">alt=</span><span class="s">"sample"</span><span class="nt">&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
+  <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"photo.jpg"</span> <span class="na">width=</span><span class="s">"900"</span> <span class="na">height=</span><span class="s">"600"</span> <span class="na">alt=</span><span class="s">"sample"</span><span class="nt">&gt;</span>         <span class="c">&lt;!-- Like an iframe document --&gt;</span>
 <span class="nt">&lt;/div&gt;</span>
 </pre></div>
 <br>
 
 <div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">element</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'view'</span><span class="p">);</span>
 <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
-<span class="c1">// Now, the element accepts swipe operation.</span>
+<span class="c1">// Now, the element accepts swipe/flick/drag operation.</span>
 
 <span class="c1">// And it can scroll via scrollLeft/scrollTop.</span>
 <span class="nx">element</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>
@@ -92,11 +91,11 @@
 <h2>
 <a name="constructor" class="anchor" href="#constructor"><span class="octicon octicon-link"></span></a>Constructor</h2>
 
-<div class="highlight highlight-js"><pre><span class="nx">overflowA</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">viewElement</span><span class="p">)</span>
+<div class="highlight highlight-js"><pre><span class="nx">overflowA</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span>
 </pre></div>
 
 <p>The <code>OverflowAndroid</code> constructor accepts a element that is scrolling frame. It get first child element that includes contents and it moves when scrolling. The specified element like an <code>iframe</code> window, and the first child element like an <code>iframe</code> document.<br>
-That has already finished. Now, the specified element accept swipe operation, and it can scroll via <code>scrollLeft</code>/<code>scrollTop</code>.<br>
+That has already finished. Now, the specified element accept swipe/flick/drag operation, and it can scroll via <code>scrollLeft</code>/<code>scrollTop</code>.<br>
 And the instance that is returned by constructor has some methods. (see below)<br>
 NOTE: The contents that is included in specified element other than first child element of it are ignored.</p>
 
@@ -160,13 +159,13 @@ NOTE: This must be done before making an instance.</p>
 <a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>
 </h3>
 
-<p>This is frame rate for inertia scroll animation when swipe operation. This is a number of frames per second. <code>60</code> as default.</p>
+<p>This is frame rate for inertia scroll animation when swipe/flick/drag operation. This is a number of frames per second. <code>60</code> as default.</p>
 
 <h3>
 <a name="overflowandroidfriction" class="anchor" href="#overflowandroidfriction"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.friction</code>
 </h3>
 
-<p>This is strength of slowdown for inertia scroll animation when swipe operation. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
+<p>This is strength of slowdown for inertia scroll animation when swipe/flick/drag operation. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
 
 <h2>
 <a name="see-also" class="anchor" href="#see-also"><span class="octicon octicon-link"></span></a>See Also</h2>
