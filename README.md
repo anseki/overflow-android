@@ -4,8 +4,8 @@ The polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / 
 
 Android browser has problems as below:
 
-- `overflow:scroll` and `overflow:auto` don't work on Android 2.x. The elements don't accept swipe operation.
-- `element.scrollLeft` and `element.scrollTop` don't work on Android 4.0.x. The elements can't scroll via JavaScript. Strange to say, the element that is set `overflow:hidden` can scroll. But of course that element doesn't accept swipe operation.
+- `overflow:scroll` and `overflow:auto` don't work on Android 2.x. The elements don't accept swipe/flick/drag operation.
+- `element.scrollLeft` and `element.scrollTop` don't work on Android 4.0.x. The elements can't scroll via JavaScript. Strange to say, the element that is set `overflow:hidden` can scroll. But of course that element doesn't accept swipe/flick/drag operation.
 
 OverflowAndroid solves above problems both.
 
@@ -22,16 +22,14 @@ OverflowAndroid solves above problems both.
 ```html
 <!-- This `overflow:auto` isn't necessary. It works on desktop PC as native. -->
 <div id="view" style="overflow: auto; width: 300px; height: 300px;">  <!-- Like an iframe window -->
-  <div style="width: 900px; height: 600px;">                          <!-- Like an iframe document -->
-    <img src="photo.jpg" width="900" height="600" alt="sample">
-  </div>
+  <img src="photo.jpg" width="900" height="600" alt="sample">         <!-- Like an iframe document -->
 </div>
 ```
 
 ```js
 var element = document.getElementById('view');
 new OverflowAndroid(element);
-// Now, the element accepts swipe operation.
+// Now, the element accepts swipe/flick/drag operation.
 
 // And it can scroll via scrollLeft/scrollTop.
 element.scrollLeft = 30;
@@ -40,11 +38,11 @@ element.scrollLeft = 30;
 ## Constructor
 
 ```js
-overflowA = new OverflowAndroid(viewElement)
+overflowA = new OverflowAndroid(element)
 ```
 
 The `OverflowAndroid` constructor accepts a element that is scrolling frame. It get first child element that includes contents and it moves when scrolling. The specified element like an `iframe` window, and the first child element like an `iframe` document.  
-That has already finished. Now, the specified element accept swipe operation, and it can scroll via `scrollLeft`/`scrollTop`.  
+That has already finished. Now, the specified element accept swipe/flick/drag operation, and it can scroll via `scrollLeft`/`scrollTop`.  
 And the instance that is returned by constructor has some methods. (see below)  
 NOTE: The contents that is included in specified element other than first child element of it are ignored.
 
@@ -99,10 +97,10 @@ OverflowAndroid.enable = true;
 ```
 
 ### `OverflowAndroid.fps`
-This is frame rate for inertia scroll animation when swipe operation. This is a number of frames per second. `60` as default.
+This is frame rate for inertia scroll animation when swipe/flick/drag operation. This is a number of frames per second. `60` as default.
 
 ### `OverflowAndroid.friction`
-This is strength of slowdown for inertia scroll animation when swipe operation. This is a number of pixels per milli second. `0.001` as default.
+This is strength of slowdown for inertia scroll animation when swipe/flick/drag operation. This is a number of pixels per milli second. `0.001` as default.
 
 ## See Also
 
