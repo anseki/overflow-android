@@ -6,27 +6,32 @@
  * Licensed under the MIT license.
  */
 
+/* exported OverflowAndroid */
+/* global Hammer:false */
+
 /*
   PROPERTIES
 
     elmView         : outer element
-    elmContents     : inner element
+    elmContent      : inner element
     scrollValue     : {left: N, top: N} current scroll value
-    scrollMax       : {left: N, top: N} range
-    positionMin     : {left: N, top: N} range of elmContents
-    positionMax     : {left: N, top: N} range of elmContents
-    positionOffset  : {left: N, top: N} margin of elmContents
-    startPoint      : {clientX: N, clientY: N} start point of cursor
-    startScroll     : {left: N, top: N} start scroll value
-    inertia         : {intervalTime: N,
-                        x: {velocity: N, direction: -1 | 1, friction: N}, y: SAME} velocity: px/ms
+    scrollMax       : {left: N, top: N} range scroll value
+    positionMin     : {left: N, top: N} range of elmContent position
+    positionMax     : {left: N, top: N} range of elmContent position
+    positionOffset  : {left: N, top: N} margin of elmContent
+    inertia         : {
+                        intervalTime: N,
+                        x: {
+                          velocity: N,          // px/ms
+                          direction: N,         // -1 | 1
+                          friction: N
+                        },
+                        y: SAME
+                      }
     timer           : timer ID
     hammer          : Hammer.Manager
     enable
 */
-
-/* exported OverflowAndroid */
-/* global Hammer:false */
 
 var OverflowAndroid = (function(undefined) {
 'use strict';
@@ -39,13 +44,13 @@ var DEFAULT_FPS = 60,
   items = [], styleValueDraggable, styleValueDragging;
 
 function OverflowAndroid(target) {
-  var that = this;
+  var that = this, startPoint, startScroll;
 
   that.elmView = target;
   if (!OverflowAndroid.enable ||
     !Array.prototype.some.call(that.elmView.childNodes, function(node) {
       if (node.nodeType === 1) {
-        that.elmContents = node;
+        that.elmContent = node;
         return true;
       }
     })) { return; }
@@ -53,7 +58,7 @@ function OverflowAndroid(target) {
   if (window.getComputedStyle(that.elmView, '').position === 'static')
     { that.elmView.style.position = 'relative'; }
   that.elmView.style.overflow = 'hidden';
-  that.elmContents.style.position = 'absolute';
+  that.elmContent.style.position = 'absolute';
   styleValueDraggable = tryStyle(that.elmView, 'cursor',
     styleValueDraggable ? [styleValueDraggable] : STYLE_VALUES_DRAGGABLE);
 
@@ -83,8 +88,9 @@ function OverflowAndroid(target) {
   })
   .on('panstart', function(e) {
     if (that.timer) { window.clearInterval(that.timer); delete that.timer; }
-    that.startPoint = {clientX: e.pointers[0].clientX, clientY: e.pointers[0].clientY};
-    that.startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
+    // start point of cursor / scroll value
+    startPoint = {clientX: e.pointers[0].clientX, clientY: e.pointers[0].clientY};
+    startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
     that.elmView.style.cursor = '';
     styleValueDragging = tryStyle(document.body, 'cursor',
       styleValueDragging ? [styleValueDragging] : STYLE_VALUES_DRAGGING);
@@ -92,48 +98,31 @@ function OverflowAndroid(target) {
   })
   .on('panmove', function(e) {
     // to minus -> scroll to plus
-    scroll(that, 'left', that.startScroll.left +
-      that.startPoint.clientX - e.pointers[0].clientX);
-    scroll(that, 'top', that.startScroll.top +
-      that.startPoint.clientY - e.pointers[0].clientY);
-    that.inertia = {
-      x: {
-        velocity: Math.abs(e.velocityX),
-        direction: e.velocityX > 0 ? 1 : -1
-      },
-      y: {
-        velocity: Math.abs(e.velocityY),
-        direction: e.velocityY > 0 ? 1 : -1
-      }
-    };
+    scroll(that, 'left', startScroll.left + startPoint.clientX - e.pointers[0].clientX);
+    scroll(that, 'top', startScroll.top + startPoint.clientY - e.pointers[0].clientY);
+    that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     e.preventDefault();
   })
   .on('panend', function(e) {
-    var inertia = that.inertia, inertiaBase, inertiaAnother;
+    var inertia = that.inertia, rad;
     styleValueDraggable = tryStyle(that.elmView, 'cursor',
       styleValueDraggable ? [styleValueDraggable] : STYLE_VALUES_DRAGGABLE);
     document.body.style.cursor = '';
-    // inertia = {
-    //   intervalTime: (new Date()).getTime(),
-    //   x: {
-    //     velocity: Math.abs(e.velocityX),
-    //     direction: e.velocityX > 0 ? 1 : -1
-    //   },
-    //   y: {
-    //     velocity: Math.abs(e.velocityY),
-    //     direction: e.velocityY > 0 ? 1 : -1
-    //   }
-    // };
-    if (inertia.x.velocity === inertia.y.velocity) {
-      inertia.x.friction = inertia.y.friction = OverflowAndroid.friction;
+
+    // Init inertia scroll animation
+    inertia.x.direction = inertia.x.velocity > 0 ? 1 : -1;
+    inertia.x.velocity = Math.abs(inertia.x.velocity);
+    inertia.y.direction = inertia.y.velocity > 0 ? 1 : -1;
+    inertia.y.velocity = Math.abs(inertia.y.velocity);
+    if (inertia.x.velocity && inertia.y.velocity) {
+      rad = Math.atan2(inertia.y.velocity, inertia.x.velocity);
+      inertia.x.friction = Math.cos(rad) * OverflowAndroid.friction;
+      inertia.y.friction = Math.sin(rad) * OverflowAndroid.friction;
     } else {
-      if (inertia.x.velocity > inertia.y.velocity)
-        { inertiaBase = inertia.x; inertiaAnother = inertia.y; }
-      else { inertiaBase = inertia.y; inertiaAnother = inertia.x; }
-      inertiaBase.friction = OverflowAndroid.friction;
-      inertiaAnother.friction =
-        inertiaAnother.velocity / inertiaBase.velocity * OverflowAndroid.friction;
+      inertia.x.friction = inertia.x.velocity ? OverflowAndroid.friction : 0;
+      inertia.y.friction = inertia.y.velocity ? OverflowAndroid.friction : 0;
     }
+
     inertia.intervalTime = (new Date()).getTime();
     that.timer = window.setInterval(function() { inertiaScroll(that); },
       1000 / OverflowAndroid.fps);
@@ -147,9 +136,9 @@ OverflowAndroid.prototype.initSize = function() {
   var viewWidth = this.elmView.clientWidth,
     viewHeight = this.elmView.clientHeight,
     viewStyle = window.getComputedStyle(this.elmView, ''),
-    contentsWidth = this.elmContents.offsetWidth,
-    contentsHeight = this.elmContents.offsetHeight,
-    contentsStyle = window.getComputedStyle(this.elmContents, '');
+    contentsWidth = this.elmContent.offsetWidth,
+    contentsHeight = this.elmContent.offsetHeight,
+    contentsStyle = window.getComputedStyle(this.elmContent, '');
 
   if (!this.enable) { return this; }
 
@@ -198,7 +187,7 @@ function scroll(that, direction, newValue) {
       { newValue = that.scrollMax[direction]; }
 
     if (newValue !== that.scrollValue[direction]) {
-      that.elmContents.style[direction] = (that.positionMax[direction] -
+      that.elmContent.style[direction] = (that.positionMax[direction] -
         (that.scrollValue[direction] = newValue) - that.positionOffset[direction]) + 'px';
     }
 
