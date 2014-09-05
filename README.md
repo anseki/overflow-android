@@ -107,6 +107,7 @@ This is strength of slowdown of inertia scroll animation for fast scroll operati
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-05			v0.2.2			Adjust fast scroll sensor.
  * 2014-09-05			v0.2.1			Change calculation of velocity.
  * 2014-09-05			v0.2.0			Support CSS `transform`.
  * 2014-09-05			v0.1.2			Change calculation of friction.

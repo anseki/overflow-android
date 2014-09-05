@@ -39,6 +39,7 @@ var OverflowAndroid = (function(undefined) {
 
 var DEFAULT_FPS = 60,
   DEFAULT_FRICTION = 0.001, // minus from velocity per ms
+  PANSTOP_INTERVAL = 100, // ms
 
   items = [],
   positionTo, inertiaScroll, inertiaScrollStop,
@@ -46,7 +47,7 @@ var DEFAULT_FPS = 60,
   getStyleProp, setStyleValue;
 
 function OverflowAndroid(target) {
-  var that = this, startPoint, startScroll;
+  var that = this, startPoint, startScroll, panmoveTime;
 
   that.elmView = target;
   if (!OverflowAndroid.enable ||
@@ -122,10 +123,14 @@ function OverflowAndroid(target) {
     scroll(that, 'left', startScroll.left + startPoint.clientX - e.pointers[0].clientX);
     scroll(that, 'top', startScroll.top + startPoint.clientY - e.pointers[0].clientY);
     that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
+    panmoveTime = e.timeStamp;
     e.preventDefault();
   })
   .on('panend', function(e) {
     var inertia = that.inertia, rad;
+    if (e.timeStamp - panmoveTime > PANSTOP_INTERVAL) { // reset
+      inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
+    }
     setStyleValue(that.elmView, 'cursor', 'grab', 'move');
     document.body.style.cursor = '';
 
