@@ -14,6 +14,7 @@
 
     elmView         : outer element
     elmContent      : inner element
+    elmContentY     : added wrapper element for transform separated from X
     scrollValue     : {left: N, top: N} current scroll value
     scrollMax       : {left: N, top: N} range scroll value
     positionMin     : {left: N, top: N} range of elmContent position
@@ -38,10 +39,11 @@ var OverflowAndroid = (function(undefined) {
 
 var DEFAULT_FPS = 60,
   DEFAULT_FRICTION = 0.001, // minus from velocity per ms
-  STYLE_VALUES_DRAGGABLE = ['grab', '-moz-grab', '-webkit-grab', '-o-grab', '-ms-grab', 'move'],
-  STYLE_VALUES_DRAGGING = ['grabbing', '-moz-grabbing', '-webkit-grabbing', '-o-grabbing', '-ms-grabbing', 'crosshair'],
 
-  items = [], styleValueDraggable, styleValueDragging;
+  items = [],
+  positionTo, inertiaScroll, inertiaScrollStop,
+  propTransform,/* propTrstProperty, propTrstDuration, propTrstTFunction,*/
+  getStyleProp, setStyleValue;
 
 function OverflowAndroid(target) {
   var that = this, startPoint, startScroll;
@@ -55,28 +57,48 @@ function OverflowAndroid(target) {
       }
     })) { return; }
 
-  if (window.getComputedStyle(that.elmView, '').position === 'static')
-    { that.elmView.style.position = 'relative'; }
+  // check `transform` for position is usable
+  if (!positionTo) {
+    positionTo = (propTransform = getStyleProp('transform', that.elmView)) ?
+      _positionTo : _positionToLegacy;
+  }
+  if (positionTo === _positionTo) {
+    that.elmContentY = that.elmView.insertBefore(
+      document.createElement('div'), that.elmContent);
+    that.elmContentY.style.margin = that.elmContentY.style.padding = '0'; // normalize
+    that.elmContentY.appendChild(that.elmContent);
+  } else { // Legacy
+    if (window.getComputedStyle(that.elmView, '').position === 'static')
+      { that.elmView.style.position = 'relative'; }
+    that.elmContent.style.position = 'absolute';
+  }
+
+  // if () {
+  //   propTrstProperty = getStyleProp('transitionProperty', that.elmView);
+  //   propTrstDuration = getStyleProp('transitionDuration', that.elmView);
+  //   propTrstTFunction = getStyleProp('transitionTimingFunction', that.elmView);
+  // }
+  inertiaScroll = _inertiaScrollLegacy;
+  inertiaScrollStop = _inertiaScrollStopLegacy;
+
   that.elmView.style.overflow = 'hidden';
-  that.elmContent.style.position = 'absolute';
-  styleValueDraggable = tryStyle(that.elmView, 'cursor',
-    styleValueDraggable ? [styleValueDraggable] : STYLE_VALUES_DRAGGABLE);
+  setStyleValue(that.elmView, 'cursor', 'grab', 'move');
 
   Object.defineProperty(that.elmView, 'scrollLeft', {
-    get: function() { return that.scrollLeft(); },
-    set: function(value) { that.scrollLeft(value); }
+    get: function() { return scroll(that, 'left'); },
+    set: function(value) { scroll(that, 'left', value); }
   });
   Object.defineProperty(that.elmView, 'scrollTop', {
-    get: function() { return that.scrollTop(); },
-    set: function(value) { that.scrollTop(value); }
+    get: function() { return scroll(that, 'top'); },
+    set: function(value) { scroll(that, 'top', value); }
   });
 
   ['scrollValue', 'scrollMax', 'positionMin', 'positionMax', 'positionOffset']
     .forEach(function(prop) { that[prop] = {}; });
   that.enable = true;
   that.initSize();
-  that.scrollLeft(0);
-  that.scrollTop(0);
+  scroll(that, 'left', 0);
+  scroll(that, 'top', 0);
   items.push(that);
 
   // Events
@@ -87,13 +109,12 @@ function OverflowAndroid(target) {
     ]
   })
   .on('panstart', function(e) {
-    if (that.timer) { window.clearInterval(that.timer); delete that.timer; }
+    inertiaScrollStop(that);
     // start point of cursor / scroll value
     startPoint = {clientX: e.pointers[0].clientX, clientY: e.pointers[0].clientY};
     startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
     that.elmView.style.cursor = '';
-    styleValueDragging = tryStyle(document.body, 'cursor',
-      styleValueDragging ? [styleValueDragging] : STYLE_VALUES_DRAGGING);
+    setStyleValue(document.body, 'cursor', 'grabbing', 'crosshair');
     e.preventDefault();
   })
   .on('panmove', function(e) {
@@ -105,8 +126,7 @@ function OverflowAndroid(target) {
   })
   .on('panend', function(e) {
     var inertia = that.inertia, rad;
-    styleValueDraggable = tryStyle(that.elmView, 'cursor',
-      styleValueDraggable ? [styleValueDraggable] : STYLE_VALUES_DRAGGABLE);
+    setStyleValue(that.elmView, 'cursor', 'grab', 'move');
     document.body.style.cursor = '';
 
     // Init inertia scroll animation
@@ -122,10 +142,7 @@ function OverflowAndroid(target) {
       inertia.x.friction = inertia.x.velocity ? OverflowAndroid.friction : 0;
       inertia.y.friction = inertia.y.velocity ? OverflowAndroid.friction : 0;
     }
-
-    inertia.intervalTime = (new Date()).getTime();
-    that.timer = window.setInterval(function() { inertiaScroll(that); },
-      1000 / OverflowAndroid.fps);
+    inertiaScroll(that);
     e.preventDefault();
   })/*
   .on('swipe', function(e) {
@@ -136,24 +153,34 @@ OverflowAndroid.prototype.initSize = function() {
   var viewWidth = this.elmView.clientWidth,
     viewHeight = this.elmView.clientHeight,
     viewStyle = window.getComputedStyle(this.elmView, ''),
-    contentsWidth = this.elmContent.offsetWidth,
-    contentsHeight = this.elmContent.offsetHeight,
-    contentsStyle = window.getComputedStyle(this.elmContent, '');
+    contentWidth = this.elmContent.offsetWidth,
+    contentHeight = this.elmContent.offsetHeight,
+    contentStyle = window.getComputedStyle(this.elmContent, '');
 
   if (!this.enable) { return this; }
 
-  this.positionMin.left = viewWidth - contentsWidth -
-    parseFloat(viewStyle.paddingRight) - parseFloat(contentsStyle.marginRight);
-  this.positionMax.left = parseFloat(viewStyle.paddingLeft) +
-    (this.positionOffset.left = parseFloat(contentsStyle.marginLeft));
+  this.positionMin.left = viewWidth - contentWidth -
+    parseFloat(viewStyle.paddingRight) - parseFloat(contentStyle.marginRight);
+  this.positionMax.left = positionTo === _positionTo ?
+    // positionOffset includes padding
+    (this.positionOffset.left = parseFloat(viewStyle.paddingLeft) +
+      parseFloat(contentStyle.marginLeft)) :
+    // positionOffset excludes padding
+    parseFloat(viewStyle.paddingLeft) +
+      (this.positionOffset.left = parseFloat(contentStyle.marginLeft));
   if (this.positionMin.left > this.positionMax.left)
     { this.positionMin.left = this.positionMax.left; }
   this.scrollMax.left = this.positionMax.left - this.positionMin.left;
 
-  this.positionMin.top = viewHeight - contentsHeight -
-    parseFloat(viewStyle.paddingBottom) - parseFloat(contentsStyle.marginBottom);
-  this.positionMax.top = parseFloat(viewStyle.paddingTop) +
-    (this.positionOffset.top = parseFloat(contentsStyle.marginTop));
+  this.positionMin.top = viewHeight - contentHeight -
+    parseFloat(viewStyle.paddingBottom) - parseFloat(contentStyle.marginBottom);
+  this.positionMax.top = positionTo === _positionTo ?
+    // positionOffset includes padding
+    (this.positionOffset.top = parseFloat(viewStyle.paddingTop) +
+      parseFloat(contentStyle.marginTop)) :
+    // positionOffset excludes padding
+    parseFloat(viewStyle.paddingTop) +
+      (this.positionOffset.top = parseFloat(contentStyle.marginTop));
   if (this.positionMin.top > this.positionMax.top)
     { this.positionMin.top = this.positionMax.top; }
   this.scrollMax.top = this.positionMax.top - this.positionMin.top;
@@ -166,59 +193,140 @@ OverflowAndroid.prototype.scrollLeft =
 OverflowAndroid.prototype.scrollTop =
   function(newValue) { return scroll(this, 'top', newValue); };
 
-function tryStyle(element, prop, values) {
-  var foundValue;
-  values.some(function(value) {
-    element.style[prop] = value;
-    if (element.style[prop] === value) {
-      foundValue = value;
-      return true;
-    }
-  });
-  return foundValue;
-}
-
-function scroll(that, direction, newValue) {
+function scroll(that, direction, newValue, force) {
   if (!that.enable) { return; }
   if (typeof newValue === 'number') {
-
     if (newValue < 0) { newValue = 0; }
     else if (newValue > that.scrollMax[direction])
       { newValue = that.scrollMax[direction]; }
+  } else { newValue = that.scrollValue[direction]; }
 
-    if (newValue !== that.scrollValue[direction]) {
-      that.elmContent.style[direction] = (that.positionMax[direction] -
-        (that.scrollValue[direction] = newValue) - that.positionOffset[direction]) + 'px';
-    }
-
+  if (newValue !== that.scrollValue[direction] || force) {
+    positionTo(that, direction, (that.scrollValue[direction] = newValue));
   }
   return that.scrollValue[direction];
 }
 
-function inertiaScroll(that) {
+function _positionTo(that, direction, scrollValue) {
+  // positionMax: edge to edge of elements
+  // translate: margin+padding excluded i.e. edge: translate + margin+padding(positionOffset)
+  var elm, axis;
+  if (direction === 'left') { elm = that.elmContent;  axis = 'X'; }
+  else            /* top */ { elm = that.elmContentY; axis = 'Y'; }
+
+  elm.style[propTransform] = 'translate' + axis + '(' +
+    (that.positionMax[direction] -
+      scrollValue - that.positionOffset[direction]) + 'px)';
+}
+
+function _positionToLegacy(that, direction, scrollValue) {
+  // positionMax: edge to edge of elements
+  // left/top: margin excluded i.e. edge: left/top + margin(positionOffset)
+  that.elmContent.style[direction] = (that.positionMax[direction] -
+    scrollValue - that.positionOffset[direction]) + 'px';
+}
+
+function _inertiaScrollLegacy(that) {
+  that.inertia.intervalTime = (new Date()).getTime();
+  that.timer = window.setInterval(function() { _inertiaScrollLegacyInterval(that); },
+    1000 / OverflowAndroid.fps);
+}
+
+function _inertiaScrollLegacyInterval(that) {
   var inertia = that.inertia,
     now = (new Date()).getTime(),
     passedTime = now - inertia.intervalTime;
 
-  function _inertiaScroll(inertiaAxis, scrollDirection) {
-    var newValue, resValue, axisInertia = inertia[inertiaAxis];
+  [['x', 'left'], ['y', 'top']].forEach(function(args) {
+    var inertiaAxis = args[0], scrollDirection = args[1],
+      axisInertia = inertia[inertiaAxis],
+      frictionTime, frictionMax, frictionSum, moveLen,
+      newValue, resValue;
     if (axisInertia.velocity) {
-      newValue = that.scrollValue[scrollDirection] +
-        axisInertia.velocity * axisInertia.direction * passedTime;
-      resValue = scroll(that, scrollDirection, newValue);
-      axisInertia.velocity -= axisInertia.friction * passedTime;
-      if (newValue !== resValue || axisInertia.velocity < axisInertia.friction)
-        { axisInertia.velocity = 0; }
+      frictionTime = passedTime - 1;
+      frictionMax = frictionTime * axisInertia.friction;
+      frictionSum = frictionMax * frictionTime / 2 +
+        axisInertia.friction * frictionTime / 2;
+      moveLen = axisInertia.velocity * passedTime - frictionSum;
+      if (moveLen > 0) {
+        newValue = that.scrollValue[scrollDirection] + moveLen * axisInertia.direction;
+        resValue = scroll(that, scrollDirection, newValue);
+        axisInertia.velocity -= axisInertia.friction * passedTime;
+        if (newValue !== resValue || axisInertia.velocity < axisInertia.friction)
+          { axisInertia.velocity = 0; }
+      } else { axisInertia.velocity = 0; }
     }
-  }
-  _inertiaScroll('x', 'left');
-  _inertiaScroll('y', 'top');
+  });
   inertia.intervalTime = now;
 
-  if (inertia.x.velocity === 0 && inertia.y.velocity === 0)
-    { window.clearInterval(that.timer); delete that.timer; }
-  return that;
+  if (inertia.x.velocity === 0 && inertia.y.velocity === 0) { _inertiaScrollStopLegacy(that); }
 }
+
+function _inertiaScrollStopLegacy(that) {
+  if (that.timer !== undefined) { window.clearInterval(that.timer); delete that.timer; }
+}
+
+// getStyleProp, setStyleValue
+(function() {
+  var PREFIXES = ['webkit', 'ms', 'moz', 'o'],
+    PREFIXES_PROP = [], PREFIXES_VALUE = [],
+    props = {}, values = {}; // cache
+
+  function ucf(text) { return text.substr(0, 1).toUpperCase() + text.substr(1); }
+
+  PREFIXES.forEach(function(prefix) {
+    PREFIXES_PROP.push(prefix);
+    PREFIXES_PROP.push(ucf(prefix));
+    PREFIXES_VALUE.push('-' + prefix + '-');
+  });
+
+  getStyleProp = function(prop, elm) {
+    var style, ucfProp;
+    if (props[prop] === undefined) {
+      style = elm.style;
+
+      if (style[prop] !== undefined) { // original
+        props[prop] = prop;
+      } else { // try with prefixes
+        ucfProp = ucf(prop);
+        if (!PREFIXES_PROP.some(function(prefix) {
+            if (style[prefix + ucfProp] !== undefined) {
+              props[prop] = prefix + ucfProp;
+              return true;
+            }
+          })) { props[prop] = ''; }
+      }
+
+    }
+    return props[prop];
+  };
+
+  setStyleValue = function(elm, prop, value, alt) {
+    var style = elm.style;
+
+    function trySet(prop, value) {
+      style[prop] = value;
+      return style[prop] === value;
+    }
+
+    if (!values[prop] || values[prop][value] === undefined) {
+      values[prop] = values[prop] || {};
+
+      if (trySet(prop, value)) { // original
+        values[prop][value] = value;
+      } else if (!PREFIXES_VALUE.some(function(prefix) { // try with prefixes
+            if (trySet(prop, prefix + value)) {
+              values[prop][value] = prefix + value;
+              return true;
+            }
+          })) {
+        values[prop][value] = alt && trySet(prop, alt) ? alt : '';
+      }
+
+    } else if (values[prop][value]) { style[prop] = values[prop][value]; }
+    return values[prop][value];
+  };
+})();
 
 OverflowAndroid.enable = 'ontouchstart' in window;
 OverflowAndroid.fps = DEFAULT_FPS;
@@ -229,8 +337,8 @@ window.addEventListener('resize', function() {
   items.forEach(function(item) {
     if (!item.enable) { return; }
     item.initSize();
-    item.scrollLeft(item.scrollValue.left);
-    item.scrollTop(item.scrollValue.top);
+    scroll(item, 'left', item.scrollValue.left, true);
+    scroll(item, 'top', item.scrollValue.top, true);
   });
 }, false);
 
