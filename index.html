@@ -96,8 +96,7 @@
 
 <p>The <code>OverflowAndroid</code> constructor accepts a element that is scrolling frame. It gets a first child element that includes contents and it moves when scrolling. The specified element like an <code>iframe</code> window, and the first child element like an <code>iframe</code> document.<br>
 That has already finished. Now, the specified element accepts scroll operations (swipe, flick, drag, etc.), and it can scroll via <code>scrollLeft</code>/<code>scrollTop</code>.<br>
-And the instance that is returned by constructor has some methods. (see below)<br>
-NOTE: The contents that is included in specified element other than a first child element of it are ignored.</p>
+And the instance that is returned by constructor has some methods. (see below)<br><em>NOTE:</em> The contents that is included in specified element other than a first child element of it are ignored.</p>
 
 <h2>
 <a name="methods" class="anchor" href="#methods"><span class="octicon octicon-link"></span></a>Methods</h2>
@@ -141,8 +140,7 @@ If you change the size of elements, you must call this method.</p>
 <a name="overflowandroidenable" class="anchor" href="#overflowandroidenable"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.enable</code>
 </h3>
 
-<p>As default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.<br>
-NOTE: This must be done before making an instance.</p>
+<p>As default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
 <p>Example:</p>
 
@@ -165,14 +163,16 @@ NOTE: This must be done before making an instance.</p>
 <a name="overflowandroidtransition" class="anchor" href="#overflowandroidtransition"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.transition</code>
 </h3>
 
-<p>As default, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. If <code>false</code> is specified to this option, that animation uses legacy animation.<br>
-NOTE: This must be done before making an instance.</p>
+<p>If <code>true</code> is specified to this option, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
+
+<p>The CSS Animations works smoothly in many browsers, but some browsers (particularly Mobile Firefox) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <strong>Someone, please let me know the way.</strong></p>
 
 <h3>
 <a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>
 </h3>
 
-<p>When inertia scroll animation for fast scroll operations uses legacy animation (see <code>OverflowAndroid.transition</code>), this is frame rate of that animation. This is a number of frames per second. <code>60</code> as default.</p>
+<p>This is frame rate of inertia scroll animation for fast scroll operations. This is a number of frames per second. <code>60</code> as default.<br>
+This is ignored when that animation uses CSS Animations (see <code>OverflowAndroid.transition</code>).</p>
 
 <h2>
 <a name="see-also" class="anchor" href="#see-also"><span class="octicon octicon-link"></span></a>See Also</h2>
