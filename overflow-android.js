@@ -40,9 +40,10 @@ var OverflowAndroid = (function(undefined) {
 
 var
   DEFAULT_FRICTION = 0.001, // minus from velocity per ms
+  DEFAULT_TRANSITION = false,
+  DEFAULT_FPS = 60, // for legacy
   PANSTOP_INTERVAL = 100, // ms
   P2 = {x: 0.4, y: 1}, P_START = {x: 0, y: 0}, P_END = {x: 1, y: 1}, // bezier points
-  DEFAULT_FPS = 60, // for legacy
 
   items = [],
   // switched methods
@@ -63,11 +64,15 @@ function OverflowAndroid(target) {
       }
     })) { return; }
 
-  // check `transform` for position is usable
+  that.elmView.style.overflow = 'hidden';
+  setStyleValue(that.elmView, 'cursor', 'grab', 'move');
+
+  // check `transform` for positioning is usable
   if (!positionTo) {
-    positionTo = (propTransform = getStyleProp('transform', that.elmView)) ?
+    positionTo = (propTransform = getStyleProp('transform', that.elmContent)) ?
       _positionTo : _positionToLegacy;
   }
+  // init for positioning
   if (positionTo === _positionTo) {
     that.elmContentY = that.elmView.insertBefore(
       document.createElement('div'), that.elmContent);
@@ -83,9 +88,9 @@ function OverflowAndroid(target) {
   if (!inertiaScroll) {
     if (OverflowAndroid.transition &&
         positionTo === _positionTo && // If transition is OK, maybe transform is OK too.
-        (propTrstProperty = getStyleProp('transitionProperty', that.elmView))) {
-      propTrstDuration = getStyleProp('transitionDuration', that.elmView);
-      propTrstTFunction = getStyleProp('transitionTimingFunction', that.elmView);
+        (propTrstProperty = getStyleProp('transitionProperty', that.elmContent))) {
+      propTrstDuration = getStyleProp('transitionDuration', that.elmContent);
+      propTrstTFunction = getStyleProp('transitionTimingFunction', that.elmContent);
       inertiaScroll = _inertiaScroll;
       inertiaScrollStop = _inertiaScrollStop;
     } else { // legacy
@@ -93,6 +98,7 @@ function OverflowAndroid(target) {
       inertiaScrollStop = _inertiaScrollStopLegacy;
     }
   }
+  // init for animation
   if (inertiaScroll === _inertiaScroll) {
     [that.elmContent, that.elmContentY].forEach(function(elm) {
       ['transitionend', 'webkitTransitionEnd', 'msTransitionEnd',
@@ -103,9 +109,15 @@ function OverflowAndroid(target) {
       elm.style[propTrstProperty] = propTransform;
     });
   }
-
-  that.elmView.style.overflow = 'hidden';
-  setStyleValue(that.elmView, 'cursor', 'grab', 'move');
+  // hardware acceleration
+  [that.elmView, that.elmContent, that.elmContentY].forEach(function(elm) {
+    if (!elm) { return; }
+    elm.style[propTransform] = 'translateZ(0)';
+    elm.style[getStyleProp('perspective', elm)] = '1000';
+    elm.style[getStyleProp('backfaceVisibility', elm)] = 'hidden';
+    elm.style[getStyleProp('tapHighlightColor', elm)] = 'rgba(0, 0, 0, 0)';
+    elm.style[getStyleProp('boxShadow', elm)] = '0 0 1px rgba(0, 0, 0, 0)';
+  });
 
   Object.defineProperty(that.elmView, 'scrollLeft', {
     get: function() { return scroll(that, 'left'); },
@@ -250,11 +262,12 @@ function position2scrollValue(that, direction, position) {
 }
 
 function _positionTo(that, direction, scrollValue) {
-  var elm, axis;
-  if (direction === 'left') { elm = that.elmContent;  axis = 'X'; }
-  else            /* top */ { elm = that.elmContentY; axis = 'Y'; }
-  elm.style[propTransform] = 'translate' + axis + '(' +
-    scrollValue2position(that, direction, scrollValue) + 'px)';
+  var position = scrollValue2position(that, direction, scrollValue);
+  // translate3d trigger hardware acceleration
+  if (direction === 'left')
+    { that.elmContent.style[propTransform] = 'translate3d(' + position + 'px, 0, 0)'; }
+  else // top
+    { that.elmContentY.style[propTransform] = 'translate3d(0, ' + position + 'px, 0)'; }
 }
 
 function _positionToLegacy(that, direction, scrollValue) {
@@ -264,12 +277,11 @@ function _positionToLegacy(that, direction, scrollValue) {
 
 function _inertiaScroll(that) {
   var inertia = that.inertia;
-  [['x', 'left', that.elmContent, 'X'],
-      ['y', 'top', that.elmContentY, 'Y']].forEach(function(args) {
-    var inertiaAxis = args[0], scrollDirection = args[1],
-      elm = args[2], propAxis = args[3],
+  [['x', 'left', that.elmContent],
+      ['y', 'top', that.elmContentY]].forEach(function(args) {
+    var inertiaAxis = args[0], scrollDirection = args[1], elm = args[2],
       axisInertia = inertia[inertiaAxis],
-      timeLen, moveLen, newValue, pointInt, ratio = 1, tFunction, style;
+      timeLen, moveLen, newValue, pointInt, ratio = 1, tFunction, position, style;
     if (axisInertia.velocity) {
       timeLen = axisInertia.velocity / axisInertia.friction;
       moveLen = axisInertia.velocity * timeLen / 2 +
@@ -292,11 +304,14 @@ function _inertiaScroll(that) {
             { tFunction = 'cubic-bezier(0, 0, ' +
               pointInt.fromP2.x + ', ' + pointInt.fromP2.y + ')'; }
         }
+        position = scrollValue2position(that, scrollDirection, newValue);
         style = elm.style;
         style[propTrstDuration] = timeLen * ratio + 'ms';
         style[propTrstTFunction] = tFunction;
-        style[propTransform] = 'translate' + propAxis + '(' +
-          scrollValue2position(that, scrollDirection, newValue) + 'px)';
+        // translate3d trigger hardware acceleration
+        style[propTransform] = scrollDirection === 'left' ?
+          'translate3d(' + position + 'px, 0, 0)' :
+          'translate3d(0, ' + position + 'px, 0)';
         inertia.isScrolling = inertia.isScrolling || {};
         inertia.isScrolling[inertiaAxis] = true;
       }
@@ -315,10 +330,9 @@ function _inertiaScrollStop(that, e) {
         { inertia.isScrolling.y = false; e.stopPropagation(); }
     }
     if (!inertia.isScrolling.x && !inertia.isScrolling.y) {
-      [['left', that.elmContent, 'X', 4],
-          ['top', that.elmContentY, 'Y', 5]].forEach(function(args) {
-        var scrollDirection = args[0], elm = args[1],
-          propAxis = args[2], iMatrix = args[3], style,
+      [['left', that.elmContent, 4],
+          ['top', that.elmContentY, 5]].forEach(function(args) {
+        var scrollDirection = args[0], elm = args[1], iMatrix = args[2], style,
           matrix = window.getComputedStyle(elm, '')[propTransform].match(/(-?[\d\.]+)/g);
         if (matrix && matrix.length === 6) { // matrix(a, b, c, d, tx, ty)
           matrix[iMatrix] = +matrix[iMatrix];
@@ -326,7 +340,10 @@ function _inertiaScrollStop(that, e) {
             position2scrollValue(that, scrollDirection, matrix[iMatrix]);
           style = elm.style;
           style[propTrstDuration] = '0s'; // need 's'
-          style[propTransform] = 'translate' + propAxis + '(' + matrix[iMatrix] + 'px)';
+          // translate3d trigger hardware acceleration
+          style[propTransform] = scrollDirection === 'left' ?
+            'translate3d(' + matrix[iMatrix] + 'px, 0, 0)' :
+            'translate3d(0, ' + matrix[iMatrix] + 'px, 0)';
         }
       });
       delete inertia.isScrolling;
@@ -335,14 +352,14 @@ function _inertiaScrollStop(that, e) {
 }
 
 function _inertiaScrollLegacy(that) {
-  that.inertia.intervalTime = (new Date()).getTime();
+  that.inertia.intervalTime = Date.now();
   that.inertia.timer = window.setInterval(function() { _inertiaScrollLegacyInterval(that); },
     1000 / OverflowAndroid.fps);
 }
 
 function _inertiaScrollLegacyInterval(that) {
   var inertia = that.inertia,
-    now = (new Date()).getTime(),
+    now = Date.now(),
     passedTime = now - inertia.intervalTime;
 
   [['x', 'left'], ['y', 'top']].forEach(function(args) {
@@ -545,7 +562,7 @@ function getPointOnPath(p0, p1, p2, p3, t) {
 
 OverflowAndroid.enable = 'ontouchstart' in window;
 OverflowAndroid.friction = DEFAULT_FRICTION;
-OverflowAndroid.transition = true;
+OverflowAndroid.transition = DEFAULT_TRANSITION;
 OverflowAndroid.fps = DEFAULT_FPS;
 
 window.addEventListener('resize', function() {
