@@ -94,10 +94,10 @@
 <div class="highlight highlight-js"><pre><span class="nx">overflowA</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span>
 </pre></div>
 
-<p>The <code>OverflowAndroid</code> constructor accepts a element that is scrolling frame. It gets first child element that includes contents and it moves when scrolling. The specified element like an <code>iframe</code> window, and the first child element like an <code>iframe</code> document.<br>
+<p>The <code>OverflowAndroid</code> constructor accepts a element that is scrolling frame. It gets a first child element that includes contents and it moves when scrolling. The specified element like an <code>iframe</code> window, and the first child element like an <code>iframe</code> document.<br>
 That has already finished. Now, the specified element accepts scroll operations (swipe, flick, drag, etc.), and it can scroll via <code>scrollLeft</code>/<code>scrollTop</code>.<br>
 And the instance that is returned by constructor has some methods. (see below)<br>
-NOTE: The contents that is included in specified element other than first child element of it are ignored.</p>
+NOTE: The contents that is included in specified element other than a first child element of it are ignored.</p>
 
 <h2>
 <a name="methods" class="anchor" href="#methods"><span class="octicon octicon-link"></span></a>Methods</h2>
@@ -156,16 +156,23 @@ NOTE: This must be done before making an instance.</p>
 </pre></div>
 
 <h3>
-<a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>
-</h3>
-
-<p>This is frame rate of inertia scroll animation for fast scroll operations. This is a number of frames per second. <code>60</code> as default.</p>
-
-<h3>
 <a name="overflowandroidfriction" class="anchor" href="#overflowandroidfriction"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.friction</code>
 </h3>
 
 <p>This is strength of slowdown of inertia scroll animation for fast scroll operations. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
+
+<h3>
+<a name="overflowandroidtransition" class="anchor" href="#overflowandroidtransition"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.transition</code>
+</h3>
+
+<p>As default, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. If <code>false</code> is specified to this option, that animation uses legacy animation.<br>
+NOTE: This must be done before making an instance.</p>
+
+<h3>
+<a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>
+</h3>
+
+<p>When inertia scroll animation for fast scroll operations uses legacy animation (see <code>OverflowAndroid.transition</code>), this is frame rate of that animation. This is a number of frames per second. <code>60</code> as default.</p>
 
 <h2>
 <a name="see-also" class="anchor" href="#see-also"><span class="octicon octicon-link"></span></a>See Also</h2>
