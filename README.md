@@ -41,10 +41,10 @@ element.scrollLeft = 30;
 overflowA = new OverflowAndroid(element)
 ```
 
-The `OverflowAndroid` constructor accepts a element that is scrolling frame. It gets first child element that includes contents and it moves when scrolling. The specified element like an `iframe` window, and the first child element like an `iframe` document.  
+The `OverflowAndroid` constructor accepts a element that is scrolling frame. It gets a first child element that includes contents and it moves when scrolling. The specified element like an `iframe` window, and the first child element like an `iframe` document.  
 That has already finished. Now, the specified element accepts scroll operations (swipe, flick, drag, etc.), and it can scroll via `scrollLeft`/`scrollTop`.  
 And the instance that is returned by constructor has some methods. (see below)  
-NOTE: The contents that is included in specified element other than first child element of it are ignored.
+NOTE: The contents that is included in specified element other than a first child element of it are ignored.
 
 ## Methods
 
@@ -96,17 +96,22 @@ OverflowAndroid.enable = navigator.userAgent.indexOf('Android') > 0;
 OverflowAndroid.enable = true;
 ```
 
-### `OverflowAndroid.fps`
-This is frame rate of inertia scroll animation for fast scroll operations. This is a number of frames per second. `60` as default.
-
 ### `OverflowAndroid.friction`
 This is strength of slowdown of inertia scroll animation for fast scroll operations. This is a number of pixels per milli second. `0.001` as default.
+
+### `OverflowAndroid.transition`
+As default, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. If `false` is specified to this option, that animation uses legacy animation.  
+NOTE: This must be done before making an instance.
+
+### `OverflowAndroid.fps`
+When inertia scroll animation for fast scroll operations uses legacy animation (see `OverflowAndroid.transition`), this is frame rate of that animation. This is a number of frames per second. `60` as default.
 
 ## See Also
 
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-06			v0.3.0			Support CSS animation.
  * 2014-09-05			v0.2.2			Adjust fast scroll sensor.
  * 2014-09-05			v0.2.1			Change calculation of velocity.
  * 2014-09-05			v0.2.0			Support CSS `transform`.
