@@ -112,7 +112,7 @@ function OverflowAndroid(target) {
   // hardware acceleration
   [that.elmView, that.elmContent, that.elmContentY].forEach(function(elm) {
     if (!elm) { return; }
-    elm.style[propTransform] = 'translateZ(0)';
+    elm.style[getStyleProp('transform', elm)] = 'translateZ(0)';
     elm.style[getStyleProp('perspective', elm)] = '1000';
     elm.style[getStyleProp('backfaceVisibility', elm)] = 'hidden';
     elm.style[getStyleProp('tapHighlightColor', elm)] = 'rgba(0, 0, 0, 0)';
