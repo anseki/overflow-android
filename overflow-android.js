@@ -14,7 +14,6 @@
 
     elmView         : outer element
     elmContent      : inner element
-    elmContentY     : added wrapper element for transform separated from X
     scrollValue     : {left: N, top: N} current scroll value
     scrollMax       : {left: N, top: N} range scroll value
     positionMin     : {left: N, top: N} range of elmContent position
@@ -49,7 +48,7 @@ var
   // switched methods
   positionTo, inertiaScroll, inertiaScrollStop,
   // CSS properties
-  propTransform, propTrstProperty, propTrstDuration, propTrstTFunction,
+  propTransform, propTrstProperty, propTrstDuration, propTrstTFunction, propTrstDelay,
   getStyleProp, setStyleValue;
 
 function OverflowAndroid(target) {
@@ -69,16 +68,11 @@ function OverflowAndroid(target) {
 
   // check `transform` for positioning is usable
   if (!positionTo) {
-    positionTo = (propTransform = getStyleProp('transform', that.elmContent)) ?
+    positionTo = (propTransform = getStyleProp('xtransform', that.elmContent)) ?
       _positionTo : _positionToLegacy;
   }
   // init for positioning
-  if (positionTo === _positionTo) {
-    that.elmContentY = that.elmView.insertBefore(
-      document.createElement('div'), that.elmContent);
-    that.elmContentY.style.margin = that.elmContentY.style.padding = '0'; // normalize
-    that.elmContentY.appendChild(that.elmContent);
-  } else { // legacy
+  if (positionTo !== _positionTo) { // legacy
     if (window.getComputedStyle(that.elmView, '').position === 'static')
       { that.elmView.style.position = 'relative'; }
     that.elmContent.style.position = 'absolute';
@@ -91,6 +85,7 @@ function OverflowAndroid(target) {
         (propTrstProperty = getStyleProp('transitionProperty', that.elmContent))) {
       propTrstDuration = getStyleProp('transitionDuration', that.elmContent);
       propTrstTFunction = getStyleProp('transitionTimingFunction', that.elmContent);
+      propTrstDelay = getStyleProp('transitionDelay', that.elmContent);
       inertiaScroll = _inertiaScroll;
       inertiaScrollStop = _inertiaScrollStop;
     } else { // legacy
@@ -100,40 +95,37 @@ function OverflowAndroid(target) {
   }
   // init for animation
   if (inertiaScroll === _inertiaScroll) {
-    [that.elmContent, that.elmContentY].forEach(function(elm) {
-      ['transitionend', 'webkitTransitionEnd', 'msTransitionEnd',
-          'MozTransitionEnd', 'oTransitionEnd'].forEach(function(type) {
-        elm.addEventListener(type,
-          function(e) { _inertiaScrollStop(that, e); }, false);
-      });
-      elm.style[propTrstProperty] = propTransform;
+    ['transitionend', 'webkitTransitionEnd', 'msTransitionEnd',
+        'MozTransitionEnd', 'oTransitionEnd'].forEach(function(type) {
+      that.elmContent.addEventListener(type,
+        function(e) { _inertiaScrollStop(that, e); }, false);
     });
+    that.elmContent.style[propTrstProperty] = propTransform;
   }
-  // hardware acceleration
-  [that.elmView, that.elmContent, that.elmContentY].forEach(function(elm) {
-    if (!elm) { return; }
-    elm.style[getStyleProp('transform', elm)] = 'translateZ(0)';
-    elm.style[getStyleProp('perspective', elm)] = '1000';
-    elm.style[getStyleProp('backfaceVisibility', elm)] = 'hidden';
-    elm.style[getStyleProp('tapHighlightColor', elm)] = 'rgba(0, 0, 0, 0)';
-    elm.style[getStyleProp('boxShadow', elm)] = '0 0 1px rgba(0, 0, 0, 0)';
-  });
+  // for hardware acceleration
+  (function() {
+    var styles = {};
+    styles[getStyleProp('transform', that.elmView)] = 'translateZ(0)';
+    styles[getStyleProp('perspective', that.elmView)] = '1000';
+    styles[getStyleProp('backfaceVisibility', that.elmView)] = 'hidden';
+    styles[getStyleProp('tapHighlightColor', that.elmView)] = 'rgba(0, 0, 0, 0)';
+    styles[getStyleProp('boxShadow', that.elmView)] = '0 0 1px rgba(0, 0, 0, 0)';
+    [that.elmView, that.elmContent].forEach(function(elm) { setStyles(elm, styles); });
+  })();
 
   Object.defineProperty(that.elmView, 'scrollLeft', {
-    get: function() { return scroll(that, 'left'); },
-    set: function(value) { scroll(that, 'left', value); }
+    get: function() { return that.scrollValue.left; },
+    set: function(left) { that.scrollLeft(left); }
   });
   Object.defineProperty(that.elmView, 'scrollTop', {
-    get: function() { return scroll(that, 'top'); },
-    set: function(value) { scroll(that, 'top', value); }
+    get: function() { return that.scrollValue.top; },
+    set: function(top) { that.scrollTop(top); }
   });
 
   ['scrollValue', 'scrollMax', 'positionMin', 'positionMax', 'positionOffset', 'inertia']
     .forEach(function(prop) { that[prop] = {}; });
   that.enable = true;
-  that.initSize();
-  scroll(that, 'left', 0);
-  scroll(that, 'top', 0);
+  that.initSize().scroll(0, 0);
   items.push(that);
 
   // Events
@@ -154,8 +146,8 @@ function OverflowAndroid(target) {
   })
   .on('panmove', function(e) {
     // to minus -> scroll to plus
-    scroll(that, 'left', startScroll.left + startPoint.clientX - e.pointers[0].clientX);
-    scroll(that, 'top', startScroll.top + startPoint.clientY - e.pointers[0].clientY);
+    that.scroll(startScroll.left + startPoint.clientX - e.pointers[0].clientX,
+      startScroll.top + startPoint.clientY - e.pointers[0].clientY);
     that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     panmoveTime = e.timeStamp;
     e.preventDefault();
@@ -228,23 +220,32 @@ OverflowAndroid.prototype.initSize = function() {
 };
 
 OverflowAndroid.prototype.scrollLeft =
-  function(newValue) { return scroll(this, 'left', newValue); };
+  function(left) { return (this.scroll(left, undefined))[left]; };
 OverflowAndroid.prototype.scrollTop =
-  function(newValue) { return scroll(this, 'top', newValue); };
+  function(top) { return (this.scroll(undefined, top))[top]; };
 
-function scroll(that, direction, newValue, force) {
+OverflowAndroid.prototype.scroll = function(left, top, force) {
+  var that = this, scrollValue = that.scrollValue,
+    newValue = {left: left, top: top};
   if (!that.enable) { return; }
-  if (typeof newValue === 'number') {
-    if (newValue < 0) { newValue = 0; }
-    else if (newValue > that.scrollMax[direction])
-      { newValue = that.scrollMax[direction]; }
-  } else { newValue = that.scrollValue[direction]; }
 
-  if (newValue !== that.scrollValue[direction] || force) {
-    positionTo(that, direction, (that.scrollValue[direction] = newValue));
+  ['left', 'top'].forEach(function(direction) {
+    if (typeof newValue[direction] === 'number') {
+      if (newValue[direction] < 0) { newValue[direction] = 0; }
+      else if (newValue[direction] > that.scrollMax[direction])
+        { newValue[direction] = that.scrollMax[direction]; }
+    } else { newValue[direction] = scrollValue[direction]; }
+  });
+
+  if (newValue.left !== scrollValue.left ||
+      newValue.top !== scrollValue.top || force) {
+    // don't copy object
+    scrollValue.left = newValue.left;
+    scrollValue.top = newValue.top;
+    positionTo(that, scrollValue);
   }
-  return that.scrollValue[direction];
-}
+  return newValue;
+};
 
 function scrollValue2position(that, direction, scrollValue) {
   /*
@@ -253,26 +254,25 @@ function scrollValue2position(that, direction, scrollValue) {
   left/top:   margin          excluded i.e. edge-position == left/top + margin(positionOffset)
   */
   return that.positionMax[direction] -
-    scrollValue - that.positionOffset[direction];
+    scrollValue[direction] - that.positionOffset[direction];
 }
 
 function position2scrollValue(that, direction, position) {
   return that.positionMax[direction] -
-    position - that.positionOffset[direction];
+    position[direction] - that.positionOffset[direction];
 }
 
-function _positionTo(that, direction, scrollValue) {
-  var position = scrollValue2position(that, direction, scrollValue);
-  // translate3d trigger hardware acceleration
-  if (direction === 'left')
-    { that.elmContent.style[propTransform] = 'translate3d(' + position + 'px, 0, 0)'; }
-  else // top
-    { that.elmContentY.style[propTransform] = 'translate3d(0, ' + position + 'px, 0)'; }
+function _positionTo(that, scrollValue) {
+  that.elmContent.style[propTransform] = 'translate3d(' +
+    scrollValue2position(that, 'left', scrollValue) + 'px, ' +
+    scrollValue2position(that, 'top', scrollValue) + 'px, 0)';
 }
 
-function _positionToLegacy(that, direction, scrollValue) {
-  that.elmContent.style[direction] =
-    scrollValue2position(that, direction, scrollValue) + 'px';
+function _positionToLegacy(that, scrollValue) {
+  setStyles(that.elmContent, {
+    left: scrollValue2position(that, 'left', scrollValue) + 'px',
+    top: scrollValue2position(that, 'top', scrollValue) + 'px'
+  });
 }
 
 function _inertiaScroll(that) {
@@ -281,7 +281,7 @@ function _inertiaScroll(that) {
       ['y', 'top', that.elmContentY]].forEach(function(args) {
     var inertiaAxis = args[0], scrollDirection = args[1], elm = args[2],
       axisInertia = inertia[inertiaAxis],
-      timeLen, moveLen, newValue, pointInt, ratio = 1, tFunction, position, style;
+      timeLen, moveLen, newValue, pointInt, ratio = 1, tFunction, position, styles = {};
     if (axisInertia.velocity) {
       timeLen = axisInertia.velocity / axisInertia.friction;
       moveLen = axisInertia.velocity * timeLen / 2 +
@@ -305,13 +305,12 @@ function _inertiaScroll(that) {
               pointInt.fromP2.x + ', ' + pointInt.fromP2.y + ')'; }
         }
         position = scrollValue2position(that, scrollDirection, newValue);
-        style = elm.style;
-        style[propTrstDuration] = timeLen * ratio + 'ms';
-        style[propTrstTFunction] = tFunction;
-        // translate3d trigger hardware acceleration
-        style[propTransform] = scrollDirection === 'left' ?
+        styles[propTrstDuration] = timeLen * ratio + 'ms';
+        styles[propTrstTFunction] = tFunction;
+        styles[propTransform] = scrollDirection === 'left' ?
           'translate3d(' + position + 'px, 0, 0)' :
           'translate3d(0, ' + position + 'px, 0)';
+        setStyles(elm, styles);
         inertia.isScrolling = inertia.isScrolling || {};
         inertia.isScrolling[inertiaAxis] = true;
       }
@@ -320,33 +319,25 @@ function _inertiaScroll(that) {
 }
 
 function _inertiaScrollStop(that, e) {
-  var inertia = that.inertia;
+  var inertia = that.inertia, elmContent = that.elmContent,
+    matrix, position, styles = {};
   if (inertia.isScrolling) {
-    if (!e) { inertia.isScrolling = {}; }
-    else if (e.propertyName === propTransform) {
-      if (e.target === that.elmContent)
-        { inertia.isScrolling.x = false; e.stopPropagation(); }
-      else if (e.target === that.elmContentY)
-        { inertia.isScrolling.y = false; e.stopPropagation(); }
-    }
-    if (!inertia.isScrolling.x && !inertia.isScrolling.y) {
-      [['left', that.elmContent, 4],
-          ['top', that.elmContentY, 5]].forEach(function(args) {
-        var scrollDirection = args[0], elm = args[1], iMatrix = args[2], style,
-          matrix = window.getComputedStyle(elm, '')[propTransform].match(/(-?[\d\.]+)/g);
-        if (matrix && matrix.length === 6) { // matrix(a, b, c, d, tx, ty)
-          matrix[iMatrix] = +matrix[iMatrix];
-          that.scrollValue[scrollDirection] =
-            position2scrollValue(that, scrollDirection, matrix[iMatrix]);
-          style = elm.style;
-          style[propTrstDuration] = '0s'; // need 's'
-          // translate3d trigger hardware acceleration
-          style[propTransform] = scrollDirection === 'left' ?
-            'translate3d(' + matrix[iMatrix] + 'px, 0, 0)' :
-            'translate3d(0, ' + matrix[iMatrix] + 'px, 0)';
-        }
-      });
-      delete inertia.isScrolling;
+    if (!e) { inertia.isScrolling = false; }
+    else if (e.propertyName === propTransform && e.target === elmContent)
+      { inertia.isScrolling = false; e.stopPropagation(); }
+    if (!inertia.isScrolling) {
+      matrix = window.getComputedStyle(elmContent, '')[propTransform].match(/(-?[\d\.]+)/g);
+      if (matrix && matrix.length === 6) { // matrix(a, b, c, d, tx, ty)
+        position = {left: +matrix[4], top: +matrix[5]};
+        that.scrollValue = {
+          left: position2scrollValue(that, 'left', position),
+          top: position2scrollValue(that, 'top', position)
+        };
+        styles[propTrstDuration] = '0s'; // need 's'
+        styles[propTransform] =
+          'translate3d(' + position.left + 'px, ' + position.top + 'px, 0)';
+        setStyles(elmContent, styles);
+      }
     }
   }
 }
@@ -360,13 +351,13 @@ function _inertiaScrollLegacy(that) {
 function _inertiaScrollLegacyInterval(that) {
   var inertia = that.inertia,
     now = Date.now(),
-    passedTime = now - inertia.intervalTime;
+    passedTime = now - inertia.intervalTime,
+    newValue = {}, resValue;
 
   [['x', 'left'], ['y', 'top']].forEach(function(args) {
     var inertiaAxis = args[0], scrollDirection = args[1],
       axisInertia = inertia[inertiaAxis],
-      frictionTime, frictionMax, frictionSum, moveLen,
-      newValue, resValue;
+      frictionTime, frictionMax, frictionSum, moveLen;
     if (axisInertia.velocity) {
       frictionTime = passedTime - 1;
       frictionMax = frictionTime * axisInertia.friction;
@@ -374,13 +365,20 @@ function _inertiaScrollLegacyInterval(that) {
         axisInertia.friction * frictionTime / 2;
       moveLen = axisInertia.velocity * passedTime - frictionSum;
       if (moveLen > 0) {
-        newValue = that.scrollValue[scrollDirection] + moveLen * axisInertia.direction;
-        resValue = scroll(that, scrollDirection, newValue);
+        newValue[scrollDirection] =
+          that.scrollValue[scrollDirection] + moveLen * axisInertia.direction;
         axisInertia.velocity -= axisInertia.friction * passedTime;
-        if (newValue !== resValue || axisInertia.velocity < axisInertia.friction)
-          { axisInertia.velocity = 0; }
+        if (axisInertia.velocity < axisInertia.friction) { axisInertia.velocity = 0; }
       } else { axisInertia.velocity = 0; }
     }
+  });
+  resValue = that.scroll(newValue.left, newValue.top);
+  [['x', 'left'], ['y', 'top']].forEach(function(args) {
+    var inertiaAxis = args[0], scrollDirection = args[1],
+      axisInertia = inertia[inertiaAxis];
+    if (newValue[scrollDirection] !== undefined &&
+        newValue[scrollDirection] !== resValue[scrollDirection])
+      { axisInertia.velocity = 0; }
   });
   inertia.intervalTime = now;
 
@@ -390,6 +388,13 @@ function _inertiaScrollLegacyInterval(that) {
 function _inertiaScrollStopLegacy(that) {
   if (that.inertia.timer !== undefined)
     { window.clearInterval(that.inertia.timer); delete that.inertia.timer; }
+}
+
+function setStyles(elm, styles) {
+  var style = elm.style, prop;
+  for (prop in styles) {
+    if (styles.hasOwnProperty(prop)) { style[prop] = styles[prop]; }
+  }
 }
 
 // getStyleProp, setStyleValue
@@ -569,9 +574,7 @@ window.addEventListener('resize', function() {
   if (!OverflowAndroid.enable) { return; }
   items.forEach(function(item) {
     if (!item.enable) { return; }
-    item.initSize();
-    scroll(item, 'left', item.scrollValue.left, true);
-    scroll(item, 'top', item.scrollValue.top, true);
+    item.initSize().scroll(undefined, undefined, true);
   });
 }, false);
 

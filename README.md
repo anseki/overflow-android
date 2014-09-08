@@ -114,6 +114,7 @@ This is ignored when that animation uses CSS Animations (see `OverflowAndroid.tr
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-08			v0.4.0			Add `scroll` method.
  * 2014-09-07			v0.3.1			CSS animation to be disabled as default.
  * 2014-09-06			v0.3.0			Support CSS animation.
  * 2014-09-05			v0.2.2			Adjust fast scroll sensor.
