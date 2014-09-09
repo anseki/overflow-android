@@ -96,7 +96,7 @@ Example:
 
 ```js
 // Android only
-OverflowAndroid.enable = navigator.userAgent.indexOf('Android') > 0;
+OverflowAndroid.enable = navigator.userAgent.indexOf('Android') >= 0;
 ```
 
 ```js
@@ -111,7 +111,7 @@ This is strength of slowdown of inertia scroll animation for fast scroll operati
 If `true` is specified to this option, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. `false` as default.  
 *NOTE:* This must be done before making an instance.
 
-The CSS Animations works smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... **Someone, please let me know the way.**
+The CSS Animations works smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... **Someone, please let me know the way.** (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
 
 ### `OverflowAndroid.fps`
 This is frame rate of inertia scroll animation for fast scroll operations. This is a number of frames per second. `60` as default.  

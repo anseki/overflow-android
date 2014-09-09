@@ -617,7 +617,7 @@ function getPointOnPath(p0, p1, p2, p3, t) {
   };
 }
 
-OverflowAndroid.enable = 'ontouchstart' in window;
+OverflowAndroid.enable = ('ontouchstart' in window)/* && (navigator.userAgent.indexOf('Firefox') < 0)*/;
 OverflowAndroid.friction = DEFAULT_FRICTION;
 OverflowAndroid.transition = DEFAULT_TRANSITION;
 OverflowAndroid.fps = DEFAULT_FPS;
