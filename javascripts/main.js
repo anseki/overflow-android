@@ -31,8 +31,8 @@ $(function() {
 
     jqContents.width(baseWidth * zoom).height(baseHeight * zoom);
     overflowA.initSize()
-      .scroll(centerPoint.x * zoom - e.center.x - offset.left,
-        centerPoint.y * zoom - e.center.y - offset.top);
+      .scroll(centerPoint.x * zoom - (e.center.x - offset.left),
+        centerPoint.y * zoom - (e.center.y - offset.top));
   });
 
   $('#btn1').click(function() {
