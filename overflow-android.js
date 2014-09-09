@@ -20,7 +20,8 @@
     positionMax     : {left: N, top: N} range of elmContent position
     positionOffset  : {left: N, top: N} margin of elmContent
     inertia         : {
-                        isScrolling: {x: B, y: B},
+                        isScrolling: B,
+                        keyframes: [styles],
                         intervalTime: N,          // for legacy
                         timer: N,                 // timer ID for legacy
                         x: {
@@ -43,13 +44,14 @@ var
   DEFAULT_FPS = 60, // for legacy
   PANSTOP_INTERVAL = 100, // ms
   P2 = {x: 0.4, y: 1}, P_START = {x: 0, y: 0}, P_END = {x: 1, y: 1}, // bezier points
+  DIRECTIONS = [{xy: 'x', lt: 'left'}, {xy: 'y', lt: 'top'}], // for loops
 
   items = [],
   // switched methods
   positionTo, inertiaScroll, inertiaScrollStop,
   // CSS properties
-  propTransform, propTrstProperty, propTrstDuration, propTrstTFunction, propTrstDelay,
-  getStyleProp, setStyleValue;
+  propTransform, propTrstProperty, propTrstDuration, propTrstTFunction,
+  getStyleProp, setStyleValue; // util methods
 
 function OverflowAndroid(target) {
   var that = this, startPoint, startScroll, panmoveTime;
@@ -68,7 +70,7 @@ function OverflowAndroid(target) {
 
   // check `transform` for positioning is usable
   if (!positionTo) {
-    positionTo = (propTransform = getStyleProp('xtransform', that.elmContent)) ?
+    positionTo = (propTransform = getStyleProp('transform', that.elmContent)) ?
       _positionTo : _positionToLegacy;
   }
   // init for positioning
@@ -77,6 +79,7 @@ function OverflowAndroid(target) {
       { that.elmView.style.position = 'relative'; }
     that.elmContent.style.position = 'absolute';
   }
+  // window.console.log('Positioning M-mode: ' + (positionTo === _positionTo));
 
   // check `transition*` for animation is usable
   if (!inertiaScroll) {
@@ -85,7 +88,6 @@ function OverflowAndroid(target) {
         (propTrstProperty = getStyleProp('transitionProperty', that.elmContent))) {
       propTrstDuration = getStyleProp('transitionDuration', that.elmContent);
       propTrstTFunction = getStyleProp('transitionTimingFunction', that.elmContent);
-      propTrstDelay = getStyleProp('transitionDelay', that.elmContent);
       inertiaScroll = _inertiaScroll;
       inertiaScrollStop = _inertiaScrollStop;
     } else { // legacy
@@ -102,6 +104,8 @@ function OverflowAndroid(target) {
     });
     that.elmContent.style[propTrstProperty] = propTransform;
   }
+  // window.console.log('Animation M-mode: ' + (inertiaScroll === _inertiaScroll));
+
   // for hardware acceleration
   (function() {
     var styles = {};
@@ -138,7 +142,7 @@ function OverflowAndroid(target) {
   .on('panstart', function(e) {
     inertiaScrollStop(that);
     // start point of cursor / scroll value
-    startPoint = {clientX: e.pointers[0].clientX, clientY: e.pointers[0].clientY};
+    startPoint = {x: e.pointers[0].clientX, y: e.pointers[0].clientY};
     startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
     that.elmView.style.cursor = '';
     setStyleValue(document.body, 'cursor', 'grabbing', 'crosshair');
@@ -146,8 +150,8 @@ function OverflowAndroid(target) {
   })
   .on('panmove', function(e) {
     // to minus -> scroll to plus
-    that.scroll(startScroll.left + startPoint.clientX - e.pointers[0].clientX,
-      startScroll.top + startPoint.clientY - e.pointers[0].clientY);
+    that.scroll(startScroll.left + startPoint.x - e.pointers[0].clientX,
+      startScroll.top + startPoint.y - e.pointers[0].clientY);
     that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     panmoveTime = e.timeStamp;
     e.preventDefault();
@@ -229,17 +233,16 @@ OverflowAndroid.prototype.scroll = function(left, top, force) {
     newValue = {left: left, top: top};
   if (!that.enable) { return; }
 
-  ['left', 'top'].forEach(function(direction) {
-    if (typeof newValue[direction] === 'number') {
-      if (newValue[direction] < 0) { newValue[direction] = 0; }
-      else if (newValue[direction] > that.scrollMax[direction])
-        { newValue[direction] = that.scrollMax[direction]; }
-    } else { newValue[direction] = scrollValue[direction]; }
+  DIRECTIONS.forEach(function(direction) {
+    if (typeof newValue[direction.lt] === 'number') {
+      if (newValue[direction.lt] < 0) { newValue[direction.lt] = 0; }
+      else if (newValue[direction.lt] > that.scrollMax[direction.lt])
+        { newValue[direction.lt] = that.scrollMax[direction.lt]; }
+    } else { newValue[direction.lt] = scrollValue[direction.lt]; }
   });
 
   if (newValue.left !== scrollValue.left ||
       newValue.top !== scrollValue.top || force) {
-    // don't copy object
     scrollValue.left = newValue.left;
     scrollValue.top = newValue.top;
     positionTo(that, scrollValue);
@@ -276,46 +279,93 @@ function _positionToLegacy(that, scrollValue) {
 }
 
 function _inertiaScroll(that) {
-  var inertia = that.inertia;
-  [['x', 'left', that.elmContent],
-      ['y', 'top', that.elmContentY]].forEach(function(args) {
-    var inertiaAxis = args[0], scrollDirection = args[1], elm = args[2],
-      axisInertia = inertia[inertiaAxis],
-      timeLen, moveLen, newValue, pointInt, ratio = 1, tFunction, position, styles = {};
+  var inertia = that.inertia,
+    keyframes = {}, moveRs = [], // {N<moveR>: {S<axis>: N<scrollValue>}}
+    timeLenAll, moveLenAll = {}, fixValue = {}, timeRLeft = 0,
+    bezierRight = {p0: P_START, p1: P_START, p2: P2, p3: P_END};
+
+  inertia.keyframes = [];
+  if (!inertia.x.velocity && !inertia.y.velocity) { return; }
+
+  DIRECTIONS.forEach(function(direction) {
+    var axisInertia = inertia[direction.xy], moveLen, newValue, moveR = 1;
+    moveLenAll[direction.xy] = 0;
     if (axisInertia.velocity) {
-      timeLen = axisInertia.velocity / axisInertia.friction;
-      moveLen = axisInertia.velocity * timeLen / 2 +
-        axisInertia.friction * timeLen / 2;
+      timeLenAll = timeLenAll || axisInertia.velocity / axisInertia.friction;
+      moveLen = axisInertia.velocity * timeLenAll / 2 +
+        axisInertia.friction * timeLenAll / 2;
       if (moveLen > 0) {
-        newValue = that.scrollValue[scrollDirection] + moveLen * axisInertia.direction;
-        tFunction = 'cubic-bezier(0, 0, ' + P2.x + ', ' + P2.y + ')';
-        if (newValue < 0 || newValue > that.scrollMax[scrollDirection]) {
-          if (axisInertia.direction === 1) { // over max
-            newValue = that.scrollMax[scrollDirection];
-            ratio = (newValue - that.scrollValue[scrollDirection]) / moveLen;
-          } else { // less than 0
-            newValue = 0;
-            ratio = that.scrollValue[scrollDirection] / moveLen;
-          }
-          pointInt = getPointOnPath(P_START, P_START, P2, P_END, getIntersections(
-            P_START, P_START, P2, P_END, {x: 0, y: ratio}, {x: 1, y: ratio}
-          )[0]);
-          if (pointInt)
-            { tFunction = 'cubic-bezier(0, 0, ' +
-              pointInt.fromP2.x + ', ' + pointInt.fromP2.y + ')'; }
+        moveLenAll[direction.xy] = moveLen;
+        newValue = that.scrollValue[direction.lt] + moveLen * axisInertia.direction;
+        if (newValue > that.scrollMax[direction.lt]) {
+          moveLen = that.scrollMax[direction.lt] - that.scrollValue[direction.lt];
+          moveR = moveLen / moveLenAll[direction.xy];
+        } else if (newValue < 0) {
+          moveLen = that.scrollValue[direction.lt];
+          moveR = moveLen / moveLenAll[direction.xy];
         }
-        position = scrollValue2position(that, scrollDirection, newValue);
-        styles[propTrstDuration] = timeLen * ratio + 'ms';
-        styles[propTrstTFunction] = tFunction;
-        styles[propTransform] = scrollDirection === 'left' ?
-          'translate3d(' + position + 'px, 0, 0)' :
-          'translate3d(0, ' + position + 'px, 0)';
-        setStyles(elm, styles);
-        inertia.isScrolling = inertia.isScrolling || {};
-        inertia.isScrolling[inertiaAxis] = true;
+        if (!keyframes[moveR]) {
+          keyframes[moveR] = {};
+          moveRs.push(moveR);
+        }
+        keyframes[moveR][direction.xy] = moveLen;
       }
     }
   });
+
+  function propScaleBezier(bezier) {
+    var p0 = {x: bezier.p0.x, y: bezier.p0.y}, p1 = {x: bezier.p1.x, y: bezier.p1.y},
+      p2 = {x: bezier.p2.x, y: bezier.p2.y}, p3 = {x: bezier.p3.x, y: bezier.p3.y},
+      offset = {x: p0.x, y: p0.y},
+      scale = {x: 1 / (p3.x - p0.x), y: 1 / (p3.y - p0.y)};
+    p0.x -= offset.x; p1.x -= offset.x; p2.x -= offset.x; p3.x -= offset.x;
+    p0.y -= offset.y; p1.y -= offset.y; p2.y -= offset.y; p3.y -= offset.y;
+    p0.x *= scale.x; p1.x *= scale.x; p2.x *= scale.x; p3.x *= scale.x;
+    p0.y *= scale.y; p1.y *= scale.y; p2.y *= scale.y; p3.y *= scale.y;
+    return 'cubic-bezier(' + p1.x + ', ' + p1.y + ', ' + p2.x + ', ' + p2.y + ')';
+  }
+
+  if (moveRs.length) {
+    moveRs.sort(function(a, b) { return a - b; });
+    moveRs.forEach(function(moveR) {
+      var styles = {}, pointInt, scrollValue = {};
+
+      if (moveR === 1) {
+        styles[propTrstDuration] = timeLenAll * (1 - timeRLeft) + 'ms';
+        styles[propTrstTFunction] = propScaleBezier(bezierRight);
+      } else {
+        pointInt = getPointOnPath(bezierRight.p0, bezierRight.p1, bezierRight.p2, bezierRight.p3,
+          getIntersections(bezierRight.p0, bezierRight.p1, bezierRight.p2, bezierRight.p3,
+            {x: 0, y: moveR}, {x: 1, y: moveR})[0]);
+        if (pointInt) {
+          styles[propTrstDuration] = timeLenAll * (pointInt.x - timeRLeft) + 'ms';
+          styles[propTrstTFunction] = propScaleBezier(
+            {p0: bezierRight.p0, p1: pointInt.fromP1, p2: pointInt.fromP2, p3: pointInt});
+          bezierRight = {p0: pointInt, p1: pointInt.toP1, p2: pointInt.toP2, p3: bezierRight.p3};
+          timeRLeft = pointInt.x;
+        }
+      }
+
+      DIRECTIONS.forEach(function(direction) {
+        var axisInertia = inertia[direction.xy];
+        if (keyframes[moveR][direction.xy] !== undefined) {
+          scrollValue[direction.lt] = that.scrollValue[direction.lt] +
+            (fixValue[direction.xy] = keyframes[moveR][direction.xy]) * axisInertia.direction;
+        } else {
+          scrollValue[direction.lt] = that.scrollValue[direction.lt] +
+            (fixValue[direction.xy] || moveLenAll[direction.xy] * moveR) * axisInertia.direction;
+        }
+      });
+      styles[propTransform] = 'translate3d(' +
+        scrollValue2position(that, 'left', scrollValue) + 'px, ' +
+        scrollValue2position(that, 'top', scrollValue) + 'px, 0)';
+
+      inertia.keyframes.push(styles);
+    });
+
+    setStyles(that.elmContent, inertia.keyframes.shift());
+    inertia.isScrolling = true;
+  }
 }
 
 function _inertiaScrollStop(that, e) {
@@ -323,16 +373,21 @@ function _inertiaScrollStop(that, e) {
     matrix, position, styles = {};
   if (inertia.isScrolling) {
     if (!e) { inertia.isScrolling = false; }
-    else if (e.propertyName === propTransform && e.target === elmContent)
-      { inertia.isScrolling = false; e.stopPropagation(); }
+    else if (e.propertyName === propTransform && e.target === elmContent) {
+      if (inertia.keyframes.length) {
+        setStyles(elmContent, inertia.keyframes.shift());
+      } else {
+        inertia.isScrolling = false;
+      }
+      e.stopPropagation();
+    }
     if (!inertia.isScrolling) {
       matrix = window.getComputedStyle(elmContent, '')[propTransform].match(/(-?[\d\.]+)/g);
       if (matrix && matrix.length === 6) { // matrix(a, b, c, d, tx, ty)
         position = {left: +matrix[4], top: +matrix[5]};
-        that.scrollValue = {
-          left: position2scrollValue(that, 'left', position),
-          top: position2scrollValue(that, 'top', position)
-        };
+        that.scrollValue.left = position2scrollValue(that, 'left', position);
+        that.scrollValue.top = position2scrollValue(that, 'top', position);
+        inertia.keyframes = [];
         styles[propTrstDuration] = '0s'; // need 's'
         styles[propTransform] =
           'translate3d(' + position.left + 'px, ' + position.top + 'px, 0)';
@@ -350,13 +405,11 @@ function _inertiaScrollLegacy(that) {
 
 function _inertiaScrollLegacyInterval(that) {
   var inertia = that.inertia,
-    now = Date.now(),
-    passedTime = now - inertia.intervalTime,
+    now = Date.now(), passedTime = now - inertia.intervalTime,
     newValue = {}, resValue;
 
-  [['x', 'left'], ['y', 'top']].forEach(function(args) {
-    var inertiaAxis = args[0], scrollDirection = args[1],
-      axisInertia = inertia[inertiaAxis],
+  DIRECTIONS.forEach(function(direction) {
+    var axisInertia = inertia[direction.xy],
       frictionTime, frictionMax, frictionSum, moveLen;
     if (axisInertia.velocity) {
       frictionTime = passedTime - 1;
@@ -365,19 +418,18 @@ function _inertiaScrollLegacyInterval(that) {
         axisInertia.friction * frictionTime / 2;
       moveLen = axisInertia.velocity * passedTime - frictionSum;
       if (moveLen > 0) {
-        newValue[scrollDirection] =
-          that.scrollValue[scrollDirection] + moveLen * axisInertia.direction;
+        newValue[direction.lt] =
+          that.scrollValue[direction.lt] + moveLen * axisInertia.direction;
         axisInertia.velocity -= axisInertia.friction * passedTime;
         if (axisInertia.velocity < axisInertia.friction) { axisInertia.velocity = 0; }
       } else { axisInertia.velocity = 0; }
     }
   });
   resValue = that.scroll(newValue.left, newValue.top);
-  [['x', 'left'], ['y', 'top']].forEach(function(args) {
-    var inertiaAxis = args[0], scrollDirection = args[1],
-      axisInertia = inertia[inertiaAxis];
-    if (newValue[scrollDirection] !== undefined &&
-        newValue[scrollDirection] !== resValue[scrollDirection])
+  DIRECTIONS.forEach(function(direction) {
+    var axisInertia = inertia[direction.xy];
+    if (newValue[direction.lt] !== undefined &&
+        newValue[direction.lt] !== resValue[direction.lt])
       { axisInertia.velocity = 0; }
   });
   inertia.intervalTime = now;

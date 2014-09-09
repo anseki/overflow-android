@@ -51,7 +51,7 @@ And the instance that is returned by constructor has some methods. (see below)
 ### `scrollLeft`
 
 ```js
-currentPosition = overflowA.scrollLeft([newPosition])
+currentLeft = overflowA.scrollLeft([newLeft])
 ```
 
 Return the number of pixels that the element's content is scrolled to the left. If an argument is given, the element scrolls to specified position and it is returned.  
@@ -60,11 +60,19 @@ This work equals `element.scrollLeft` property.
 ### `scrollTop`
 
 ```js
-currentPosition = overflowA.scrollTop([newPosition])
+currentTop = overflowA.scrollTop([newTop])
 ```
 
 Return the number of pixels that the element's content is scrolled upward. If an argument is given, the element scrolls to specified position and it is returned.  
 This work equals `element.scrollTop` property.
+
+### `scroll`
+
+```js
+currentLeftTop = overflowA.scroll([newLeft[, newTop]])
+```
+
+Return the Object that has `left` as the number of pixels that the element's content is scrolled to the left, and `top` as the number of pixels that the element's content is scrolled upward. If arguments are given, the element scrolls to specified position and it is returned.
 
 ### `initSize`
 
@@ -103,7 +111,7 @@ This is strength of slowdown of inertia scroll animation for fast scroll operati
 If `true` is specified to this option, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. `false` as default.  
 *NOTE:* This must be done before making an instance.
 
-The CSS Animations works smoothly in many browsers, but some browsers (particularly Mobile Firefox) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... **Someone, please let me know the way.**
+The CSS Animations works smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... **Someone, please let me know the way.**
 
 ### `OverflowAndroid.fps`
 This is frame rate of inertia scroll animation for fast scroll operations. This is a number of frames per second. `60` as default.  
@@ -114,6 +122,8 @@ This is ignored when that animation uses CSS Animations (see `OverflowAndroid.tr
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-09			v0.4.2			Rewrite code of CSS animation.
+ * 2014-09-09			v0.4.1			Rewrite code of positioning.
  * 2014-09-08			v0.4.0			Add `scroll` method.
  * 2014-09-07			v0.3.1			CSS animation to be disabled as default.
  * 2014-09-06			v0.3.0			Support CSS animation.
