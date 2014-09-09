@@ -224,9 +224,9 @@ OverflowAndroid.prototype.initSize = function() {
 };
 
 OverflowAndroid.prototype.scrollLeft =
-  function(left) { return (this.scroll(left, undefined))[left]; };
+  function(left) { return (this.scroll(left, undefined)).left; };
 OverflowAndroid.prototype.scrollTop =
-  function(top) { return (this.scroll(undefined, top))[top]; };
+  function(top) { return (this.scroll(undefined, top)).top; };
 
 OverflowAndroid.prototype.scroll = function(left, top, force) {
   var that = this, scrollValue = that.scrollValue,
