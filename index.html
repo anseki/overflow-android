@@ -2,7 +2,7 @@
 <html>
 
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="description" content="OverflowAndroid : The polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.">
@@ -49,8 +49,7 @@
 <code>element.scrollLeft</code> and <code>element.scrollTop</code> don't work on Android 4.0.x. The elements can't scroll via JavaScript. Strange to say, the element that is set <code>overflow:hidden</code> can scroll. But of course that element doesn't accept scroll operations.</li>
 </ul><p>OverflowAndroid solves above problems both.</p>
 
-<p style="font-weight: bold;"><a href="m.html">Test page for mobile</a> is lightweight page. </p>
-
+<p style="font-weight: bold;"><a href="m.html">Test page for mobile</a> is lightweight page.</p>
 <!-- ======== sample -->
 <div id="view"><div id="contents"><img src="images/00.jpg" width="100%" height="100%" alt="sample"></div></div>
 
@@ -71,14 +70,12 @@
 <div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"hammer.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"overflow-android.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
-<br>
 
 <div class="highlight highlight-html"><pre><span class="c">&lt;!-- This `overflow:auto` isn't necessary. It works on desktop PC as native. --&gt;</span>
 <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"view"</span> <span class="na">style=</span><span class="s">"overflow: auto; width: 300px; height: 300px;"</span><span class="nt">&gt;</span>  <span class="c">&lt;!-- Like an iframe window --&gt;</span>
   <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"photo.jpg"</span> <span class="na">width=</span><span class="s">"900"</span> <span class="na">height=</span><span class="s">"600"</span> <span class="na">alt=</span><span class="s">"sample"</span><span class="nt">&gt;</span>         <span class="c">&lt;!-- Like an iframe document --&gt;</span>
 <span class="nt">&lt;/div&gt;</span>
 </pre></div>
-<br>
 
 <div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">element</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'view'</span><span class="p">);</span>
 <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
@@ -105,7 +102,7 @@ And the instance that is returned by constructor has some methods. (see below)<b
 <a name="scrollleft" class="anchor" href="#scrollleft"><span class="octicon octicon-link"></span></a><code>scrollLeft</code>
 </h3>
 
-<div class="highlight highlight-js"><pre><span class="nx">currentPosition</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">([</span><span class="nx">newPosition</span><span class="p">])</span>
+<div class="highlight highlight-js"><pre><span class="nx">currentLeft</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">])</span>
 </pre></div>
 
 <p>Return the number of pixels that the element's content is scrolled to the left. If an argument is given, the element scrolls to specified position and it is returned.<br>
@@ -115,11 +112,20 @@ This work equals <code>element.scrollLeft</code> property.</p>
 <a name="scrolltop" class="anchor" href="#scrolltop"><span class="octicon octicon-link"></span></a><code>scrollTop</code>
 </h3>
 
-<div class="highlight highlight-js"><pre><span class="nx">currentPosition</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">([</span><span class="nx">newPosition</span><span class="p">])</span>
+<div class="highlight highlight-js"><pre><span class="nx">currentTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">([</span><span class="nx">newTop</span><span class="p">])</span>
 </pre></div>
 
 <p>Return the number of pixels that the element's content is scrolled upward. If an argument is given, the element scrolls to specified position and it is returned.<br>
 This work equals <code>element.scrollTop</code> property.</p>
+
+<h3>
+<a name="scroll" class="anchor" href="#scroll"><span class="octicon octicon-link"></span></a><code>scroll</code>
+</h3>
+
+<div class="highlight highlight-js"><pre><span class="nx">currentLeftTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scroll</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
+</pre></div>
+
+<p>Return the Object that has <code>left</code> as the number of pixels that the element's content is scrolled to the left, and <code>top</code> as the number of pixels that the element's content is scrolled upward. If arguments are given, the element scrolls to specified position and it is returned.</p>
 
 <h3>
 <a name="initsize" class="anchor" href="#initsize"><span class="octicon octicon-link"></span></a><code>initSize</code>
@@ -147,7 +153,6 @@ If you change the size of elements, you must call this method.</p>
 <div class="highlight highlight-js"><pre><span class="c1">// Android only</span>
 <span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">'Android'</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
 </pre></div>
-<br>
 
 <div class="highlight highlight-js"><pre><span class="c1">// Anytime</span>
 <span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
@@ -165,7 +170,7 @@ If you change the size of elements, you must call this method.</p>
 
 <p>If <code>true</code> is specified to this option, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
-<p>The CSS Animations works smoothly in many browsers, but some browsers (particularly Mobile Firefox) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <strong>Someone, please let me know the way.</strong></p>
+<p>The CSS Animations works smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <strong>Someone, please let me know the way.</strong></p>
 
 <h3>
 <a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>

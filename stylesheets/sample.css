@@ -1,4 +1,8 @@
 
+div.highlight {
+  margin: 20px 0;
+}
+
 #view {
   overflow: auto;
   width: 300px;
