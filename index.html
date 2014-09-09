@@ -151,7 +151,7 @@ If you change the size of elements, you must call this method.</p>
 <p>Example:</p>
 
 <div class="highlight highlight-js"><pre><span class="c1">// Android only</span>
-<span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">'Android'</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span>
+<span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">'Android'</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
 </pre></div>
 
 <div class="highlight highlight-js"><pre><span class="c1">// Anytime</span>
@@ -170,7 +170,7 @@ If you change the size of elements, you must call this method.</p>
 
 <p>If <code>true</code> is specified to this option, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
-<p>The CSS Animations works smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <strong>Someone, please let me know the way.</strong></p>
+<p>The CSS Animations works smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <strong>Someone, please let me know the way.</strong> (But Firefox for Android can't scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
 
 <h3>
 <a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>
