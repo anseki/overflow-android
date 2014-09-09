@@ -122,7 +122,7 @@ This is ignored when that animation uses CSS Animations (see `OverflowAndroid.tr
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
- * 2014-09-09			v0.4.3			Fix: `scrollLeft()` and `scrollTop()` don't return value.
+ * 2014-09-09			v0.4.3			Fix: `scrollLeft()` and `scrollTop()` do not return value.
  * 2014-09-09			v0.4.2			Rewrite code of CSS animation.
  * 2014-09-09			v0.4.1			Rewrite code of positioning.
  * 2014-09-08			v0.4.0			Add `scroll` method.
