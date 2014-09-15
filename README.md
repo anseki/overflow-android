@@ -41,7 +41,7 @@ element.scrollLeft = 30;
 overflowA = new OverflowAndroid(element)
 ```
 
-The `OverflowAndroid` constructor accepts a element that is scrolling frame. It gets a first child element that includes contents and it moves when scrolling. The specified element like an `iframe` window, and the first child element like an `iframe` document.  
+The `OverflowAndroid` constructor accepts an element that is scrolling frame. It gets a first child element that includes contents and it moves when scrolling. The specified element like an `iframe` window, and the first child element like an `iframe` document.  
 That has already finished. Now, the specified element accepts scroll operations (swipe, flick, drag, etc.), and it can scroll via `scrollLeft`/`scrollTop`.  
 And the instance that is returned by constructor has some methods. (see below)  
 *NOTE:* The contents that is included in specified element other than a first child element of it are ignored.
