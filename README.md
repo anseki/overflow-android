@@ -122,6 +122,7 @@ This is ignored when that animation uses CSS Animations (see `OverflowAndroid.tr
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-22			v0.4.7			Fix: scroll-length to be over a range when window is resized.
  * 2014-09-22			v0.4.6			Fix: `scrollLeft` and `scrollTop` native properties are restored.
  * 2014-09-22			v0.4.5			Fix: `initSize()` of disabled instance fails.
  * 2014-09-21			v0.4.4			Fix: `scrollLeft` and `scrollTop` native properties have value.

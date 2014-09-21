@@ -238,9 +238,9 @@ OverflowAndroid.prototype.initSize = function() {
 };
 
 OverflowAndroid.prototype.scrollLeft =
-  function(left) { return (this.scroll(left, undefined)).left; };
+  function(left) { return this.scroll(left, undefined).left; };
 OverflowAndroid.prototype.scrollTop =
-  function(top) { return (this.scroll(undefined, top)).top; };
+  function(top) { return this.scroll(undefined, top).top; };
 
 OverflowAndroid.prototype.scroll = function(left, top, force) {
   var that = this, scrollValue = that.scrollValue,
@@ -248,11 +248,12 @@ OverflowAndroid.prototype.scroll = function(left, top, force) {
   if (!that.enable) { return; }
 
   DIRECTIONS.forEach(function(direction) {
-    if (typeof newValue[direction.lt] === 'number') {
-      if (newValue[direction.lt] < 0) { newValue[direction.lt] = 0; }
-      else if (newValue[direction.lt] > that.scrollMax[direction.lt])
-        { newValue[direction.lt] = that.scrollMax[direction.lt]; }
-    } else { newValue[direction.lt] = scrollValue[direction.lt]; }
+    if (typeof newValue[direction.lt] !== 'number')
+      { newValue[direction.lt] = scrollValue[direction.lt]; }
+    // check scrollValue too, because range may have changed.
+    if (newValue[direction.lt] < 0) { newValue[direction.lt] = 0; }
+    else if (newValue[direction.lt] > that.scrollMax[direction.lt])
+      { newValue[direction.lt] = that.scrollMax[direction.lt]; }
   });
 
   if (newValue.left !== scrollValue.left ||
