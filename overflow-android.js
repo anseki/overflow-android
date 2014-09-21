@@ -66,8 +66,19 @@ function OverflowAndroid(target) {
     })) { return; }
 
   // Sometimes native properties have value. by reloading.
-  that.elmView.scrollLeft = that.elmView.scrollTop = 0;
-  that.elmView.style.overflow = 'hidden';
+  (function() {
+    var style = that.elmContent.style,
+      styleWidth = style.width, styleHeight = style.height;
+    that.elmView.scrollLeft = that.elmView.scrollTop = 0;
+    that.elmView.style.overflow = 'hidden'; // properties may be restored
+    that.elmView.scrollLeft = that.elmView.scrollTop = 0; // set again
+    style.width = (that.elmView.offsetWidth + 100) + 'px'; // properties may be restored
+    style.height = (that.elmView.offsetHeight + 100) + 'px';
+    that.elmView.scrollLeft = that.elmView.scrollTop = 0; // set again
+    style.width = styleWidth;
+    style.height = styleHeight;
+    that.elmView.scrollLeft = that.elmView.scrollTop = 0; // set again
+  })();
   setStyleValue(that.elmView, 'cursor', 'grab', 'move');
 
   // check `transform` for positioning is usable
