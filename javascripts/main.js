@@ -9,7 +9,7 @@ $(function() {
 
     offset = jqView.offset(),
     baseWidth = jqContents.width(), baseHeight = jqContents.height(),
-    zoom = 1, zoomStart, centerPoint;
+    zoom = 1, winScroll, zoomStart, centerPoint;
 
   offset.left += parseFloat(jqView.css('borderLeftWidth'));
   offset.top += parseFloat(jqView.css('borderTopWidth'));
@@ -18,10 +18,12 @@ $(function() {
     recognizers: [[Hammer.Pinch]]
   })
   .on('pinchstart', function(e) {
+    var win = $(window);
+    winScroll = {x: win.scrollLeft(), y: win.scrollTop()};
     zoomStart = zoom;
     centerPoint = {
-      x: (e.center.x - offset.left + overflowA.scrollLeft()) / zoomStart,
-      y: (e.center.y - offset.top + overflowA.scrollTop()) / zoomStart
+      x: (e.center.x + winScroll.x - offset.left + overflowA.scrollLeft()) / zoomStart,
+      y: (e.center.y + winScroll.y - offset.top + overflowA.scrollTop()) / zoomStart
     };
   })
   .on('pinchin pinchout', function(e) {
@@ -31,8 +33,8 @@ $(function() {
 
     jqContents.width(baseWidth * zoom).height(baseHeight * zoom);
     overflowA.initSize()
-      .scroll(centerPoint.x * zoom - (e.center.x - offset.left),
-        centerPoint.y * zoom - (e.center.y - offset.top));
+      .scroll(centerPoint.x * zoom - (e.center.x + winScroll.x - offset.left),
+        centerPoint.y * zoom - (e.center.y + winScroll.y - offset.top));
   });
 
   $('#btn1').click(function() {
