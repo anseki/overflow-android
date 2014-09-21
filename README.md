@@ -122,6 +122,7 @@ This is ignored when that animation uses CSS Animations (see `OverflowAndroid.tr
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-22			v0.4.5			Fix: `initSize()` of disabled instance fails.
  * 2014-09-21			v0.4.4			Fix: `scrollLeft` and `scrollTop` native properties have value.
  * 2014-09-09			v0.4.3			Fix: `scrollLeft()` and `scrollTop()` do not return value.
  * 2014-09-09			v0.4.2			Rewrite code of CSS animation.

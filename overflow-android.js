@@ -187,14 +187,15 @@ function OverflowAndroid(target) {
 }
 
 OverflowAndroid.prototype.initSize = function() {
-  var viewWidth = this.elmView.clientWidth,
-    viewHeight = this.elmView.clientHeight,
-    viewStyle = window.getComputedStyle(this.elmView, ''),
-    contentWidth = this.elmContent.offsetWidth,
-    contentHeight = this.elmContent.offsetHeight,
-    contentStyle = window.getComputedStyle(this.elmContent, '');
-
+  var viewWidth, viewHeight, viewStyle, contentWidth, contentHeight, contentStyle;
   if (!this.enable) { return this; }
+
+  viewWidth = this.elmView.clientWidth;
+  viewHeight = this.elmView.clientHeight;
+  viewStyle = window.getComputedStyle(this.elmView, '');
+  contentWidth = this.elmContent.offsetWidth;
+  contentHeight = this.elmContent.offsetHeight;
+  contentStyle = window.getComputedStyle(this.elmContent, '');
 
   this.positionMin.left = viewWidth - contentWidth -
     parseFloat(viewStyle.paddingRight) - parseFloat(contentStyle.marginRight);
