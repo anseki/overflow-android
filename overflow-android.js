@@ -65,6 +65,8 @@ function OverflowAndroid(target) {
       }
     })) { return; }
 
+  // Sometimes native properties have value. by reloading.
+  that.elmView.scrollLeft = that.elmView.scrollTop = 0;
   that.elmView.style.overflow = 'hidden';
   setStyleValue(that.elmView, 'cursor', 'grab', 'move');
 
