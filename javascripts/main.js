@@ -32,9 +32,8 @@ $(function() {
     else if (zoom > ZOOM_MAX) { zoom = ZOOM_MAX; }
 
     jqContents.width(baseWidth * zoom).height(baseHeight * zoom);
-    overflowA.initSize()
-      .scroll(centerPoint.x * zoom - (e.center.x + winScroll.x - offset.left),
-        centerPoint.y * zoom - (e.center.y + winScroll.y - offset.top));
+    overflowA.initSize(centerPoint.x * zoom - (e.center.x + winScroll.x - offset.left),
+      centerPoint.y * zoom - (e.center.y + winScroll.y - offset.top));
   });
 
   $('#btn1').click(function() {
