@@ -77,11 +77,11 @@ Return the Object that has `left` as the number of pixels that the element's con
 ### `initSize`
 
 ```js
-overflowA.initSize()
+overflowA.initSize([newLeft[, newTop]])
 ```
 
-OverflowAndroid computes the size of elements for scroll. It computes again when a window is resized.  
-If you change the size of elements, you must call this method.
+OverflowAndroid computes the size of elements for scroll. It computes again automatically when a window is resized. Therefore you usually don't need to call this method.  
+If you changed the size of elements, you must call this method. If arguments are given, the size of elements is computed and the element scrolls to specified position.
 
 ## Options
 
@@ -122,6 +122,7 @@ This is ignored when that animation uses CSS Animations (see `OverflowAndroid.tr
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-23			v0.4.9			`initSize()` accepts position.
  * 2014-09-22			v0.4.8			`initSize()` checks and resets position.
  * 2014-09-22			v0.4.7			Fix: scroll-length to be over a range when window is resized.
  * 2014-09-22			v0.4.6			Fix: `scrollLeft` and `scrollTop` native properties are restored.

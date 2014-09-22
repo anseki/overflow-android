@@ -197,7 +197,7 @@ function OverflowAndroid(target) {
   })*/;
 }
 
-OverflowAndroid.prototype.initSize = function() {
+OverflowAndroid.prototype.initSize = function(left, top) {
   var viewWidth, viewHeight, viewStyle, contentWidth, contentHeight, contentStyle;
   if (!this.enable) { return this; }
 
@@ -234,7 +234,7 @@ OverflowAndroid.prototype.initSize = function() {
     { this.positionMin.top = this.positionMax.top; }
   this.scrollMax.top = this.positionMax.top - this.positionMin.top;
 
-  this.scroll(undefined, undefined, true);
+  this.scroll(left, top, true);
 
   return this;
 };
