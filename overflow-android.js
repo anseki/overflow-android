@@ -139,11 +139,11 @@ function OverflowAndroid(target) {
     set: function(top) { that.scrollTop(top); }
   });
 
-  ['scrollValue', 'scrollMax', 'positionMin', 'positionMax', 'positionOffset', 'inertia']
+  ['scrollMax', 'positionMin', 'positionMax', 'positionOffset', 'inertia']
     .forEach(function(prop) { that[prop] = {}; });
+  that.scrollValue = {left: 0, top: 0};
   that.enable = true;
-  that.initSize().scroll(0, 0);
-  items.push(that);
+  items.push(that.initSize());
 
   // Events
   that.hammer = new Hammer.Manager(that.elmView, {
@@ -233,6 +233,8 @@ OverflowAndroid.prototype.initSize = function() {
   if (this.positionMin.top > this.positionMax.top)
     { this.positionMin.top = this.positionMax.top; }
   this.scrollMax.top = this.positionMax.top - this.positionMin.top;
+
+  this.scroll(undefined, undefined, true);
 
   return this;
 };
@@ -639,10 +641,7 @@ OverflowAndroid.fps = DEFAULT_FPS;
 
 window.addEventListener('resize', function() {
   if (!OverflowAndroid.enable) { return; }
-  items.forEach(function(item) {
-    if (!item.enable) { return; }
-    item.initSize().scroll(undefined, undefined, true);
-  });
+  items.forEach(function(item) { if (item.enable) { item.initSize(); } });
 }, false);
 
 return OverflowAndroid;
