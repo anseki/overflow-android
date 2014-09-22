@@ -131,11 +131,11 @@ This work equals <code>element.scrollTop</code> property.</p>
 <a name="initsize" class="anchor" href="#initsize"><span class="octicon octicon-link"></span></a><code>initSize</code>
 </h3>
 
-<div class="highlight highlight-js"><pre><span class="nx">overflowA</span><span class="p">.</span><span class="nx">initSize</span><span class="p">()</span>
+<div class="highlight highlight-js"><pre><span class="nx">overflowA</span><span class="p">.</span><span class="nx">initSize</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
 </pre></div>
 
-<p>OverflowAndroid computes the size of elements for scroll. It computes again when a window is resized.<br>
-If you change the size of elements, you must call this method.</p>
+<p>OverflowAndroid computes the size of elements for scroll. It computes again automatically when a window is resized. Therefore you usually don't need to call this method.<br>
+If you changed the size of elements, you must call this method. If arguments are given, the size of elements is computed and the element scrolls to specified position.</p>
 
 <h2>
 <a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
