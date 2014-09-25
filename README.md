@@ -122,6 +122,7 @@ This is ignored when that animation uses CSS Animations (see `OverflowAndroid.tr
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-09-26			v0.4.10			Fix: `scrollLeft()` and `scrollTop()` of disabled instance fail.
  * 2014-09-23			v0.4.9			`initSize()` accepts position.
  * 2014-09-22			v0.4.8			`initSize()` checks and resets position.
  * 2014-09-22			v0.4.7			Fix: scroll-length to be over a range when window is resized.

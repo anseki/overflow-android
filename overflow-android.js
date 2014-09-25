@@ -153,6 +153,7 @@ function OverflowAndroid(target) {
     ]
   })
   .on('panstart', function(e) {
+    if (!that.enable) { return; }
     inertiaScrollStop(that);
     // start point of cursor / scroll value
     startPoint = {x: e.pointers[0].clientX, y: e.pointers[0].clientY};
@@ -162,6 +163,7 @@ function OverflowAndroid(target) {
     e.preventDefault();
   })
   .on('panmove', function(e) {
+    if (!that.enable) { return; }
     // to minus -> scroll to plus
     that.scroll(startScroll.left + startPoint.x - e.pointers[0].clientX,
       startScroll.top + startPoint.y - e.pointers[0].clientY);
@@ -170,6 +172,7 @@ function OverflowAndroid(target) {
     e.preventDefault();
   })
   .on('panend', function(e) {
+    if (!that.enable) { return; }
     var inertia = that.inertia, rad;
     if (e.timeStamp - panmoveTime > PANSTOP_INTERVAL) { // reset
       inertia = that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
@@ -247,7 +250,7 @@ OverflowAndroid.prototype.scrollTop =
 OverflowAndroid.prototype.scroll = function(left, top, force) {
   var that = this, scrollValue = that.scrollValue,
     newValue = {left: left, top: top};
-  if (!that.enable) { return; }
+  if (!that.enable) { return scrollValue; }
 
   DIRECTIONS.forEach(function(direction) {
     if (typeof newValue[direction.lt] !== 'number')
@@ -264,7 +267,7 @@ OverflowAndroid.prototype.scroll = function(left, top, force) {
     scrollValue.top = newValue.top;
     positionTo(that, scrollValue);
   }
-  return newValue;
+  return scrollValue;
 };
 
 function scrollValue2position(that, direction, scrollValue) {
