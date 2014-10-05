@@ -1,8 +1,8 @@
 # OverflowAndroid
 
-Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.  
+Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.
 
-The desktop can implement UI that scrolls by mouse drag, inertia scroll like touch device. And problems of Android are solved.
+The desktop can implement UI that scrolls by mouse drag, inertia scroll like touch device. And problems of Android browser are solved.
 
 Android browser has problems as below:
 
