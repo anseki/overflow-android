@@ -83,6 +83,16 @@ overflowA.initSize([newLeft[, newTop]])
 OverflowAndroid computes the size of elements for scroll. It computes again automatically when a window is resized. Therefore you usually don't need to call this method.  
 If you changed the size of elements, you must call this method. If arguments are given, the size of elements is computed and the element scrolls to specified position.
 
+## Event
+
+The `scroll` event is fired when the target element has been scrolled. The `Event` object that is passed to event listeners has an additional property below.
+
+### `inertia`
+
+Type: Boolean
+
+Indicate whether the current event was fired by inertia scroll after fast scroll operations. i.e. user isn't touching the element now, if this is `true`.
+
 ## Options
 
 You can tune the behavior of OverflowAndroid via options below.
@@ -105,23 +115,24 @@ OverflowAndroid.enable = true;
 ```
 
 ### `OverflowAndroid.friction`
-This is strength of slowdown of inertia scroll animation for fast scroll operations. This is a number of pixels per milli second. `0.001` as default.
+This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. `0.001` as default.
 
 ### `OverflowAndroid.transition`
-If `true` is specified to this option, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. `false` as default.  
+If `true` is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. `false` as default.  
 *NOTE:* This must be done before making an instance.
 
 The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... **Someone, please let me know the way.** (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
 
 ### `OverflowAndroid.fps`
-This is frame rate of inertia scroll animation for fast scroll operations. This is a number of frames per second. `60` as default.  
-This is ignored when that animation uses CSS Animations (see `OverflowAndroid.transition`).
+This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. `60` as default.  
+This is ignored when CSS Animations (see `OverflowAndroid.transition`) is used.
 
 ## See Also
 
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-10-05			v0.5.0			Support `scroll` event.
  * 2014-09-26			v0.4.10			Fix: `scrollLeft()` and `scrollTop()` of disabled instance fail.
  * 2014-09-23			v0.4.9			`initSize()` accepts position.
  * 2014-09-22			v0.4.8			`initSize()` checks and resets position.

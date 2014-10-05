@@ -249,7 +249,7 @@ OverflowAndroid.prototype.scrollTop =
 
 OverflowAndroid.prototype.scroll = function(left, top, force) {
   var that = this, scrollValue = that.scrollValue,
-    newValue = {left: left, top: top};
+    newValue = {left: left, top: top}, update;
   if (!that.enable) { return scrollValue; }
 
   DIRECTIONS.forEach(function(direction) {
@@ -261,11 +261,12 @@ OverflowAndroid.prototype.scroll = function(left, top, force) {
       { newValue[direction.lt] = that.scrollMax[direction.lt]; }
   });
 
-  if (newValue.left !== scrollValue.left ||
-      newValue.top !== scrollValue.top || force) {
+  if ((update = newValue.left !== scrollValue.left ||
+      newValue.top !== scrollValue.top) || force) {
     scrollValue.left = newValue.left;
     scrollValue.top = newValue.top;
     positionTo(that, scrollValue);
+    if (update) { scrollEvent(that.elmView, that.inertia.isScrolling); } // fire event
   }
   return scrollValue;
 };
@@ -418,8 +419,10 @@ function _inertiaScrollStop(that, e) {
 }
 
 function _inertiaScrollLegacy(that) {
-  that.inertia.intervalTime = Date.now();
-  that.inertia.timer = window.setInterval(function() { _inertiaScrollLegacyInterval(that); },
+  var inertia = that.inertia;
+  inertia.isScrolling = true;
+  inertia.intervalTime = Date.now();
+  inertia.timer = window.setInterval(function() { _inertiaScrollLegacyInterval(that); },
     1000 / OverflowAndroid.fps);
 }
 
@@ -458,8 +461,19 @@ function _inertiaScrollLegacyInterval(that) {
 }
 
 function _inertiaScrollStopLegacy(that) {
-  if (that.inertia.timer !== undefined)
-    { window.clearInterval(that.inertia.timer); delete that.inertia.timer; }
+  var inertia = that.inertia;
+  inertia.isScrolling = false;
+  if (inertia.timer !== undefined)
+    { window.clearInterval(inertia.timer); delete inertia.timer; }
+}
+
+function scrollEvent(elm, inertia) {
+  // var uiEvent = new UIEvent('scroll',
+  //   {bubbles: false, cancelable: false, view: document.defaultView, detail: 0});
+  var uiEvent = document.createEvent('UIEvent');
+  uiEvent.initUIEvent('scroll', false, false, document.defaultView, 0);
+  uiEvent.inertia = !!inertia;
+  elm.dispatchEvent(uiEvent);
 }
 
 function setStyles(elm, styles) {
