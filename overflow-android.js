@@ -79,7 +79,16 @@ function OverflowAndroid(target) {
     style.height = styleHeight;
     that.elmView.scrollLeft = that.elmView.scrollTop = 0; // set again
   })();
-  setStyleValue(that.elmView, 'cursor', 'grab', 'move');
+
+  if (OverflowAndroid.cursorScrollable === undefined) {
+    OverflowAndroid.cursorScrollable = setStyleValue(that.elmView, 'cursor', 'grab', 'move');
+  }
+  if (OverflowAndroid.cursorScrolling === undefined) {
+    OverflowAndroid.cursorScrolling = setStyleValue(document.body, 'cursor', 'grabbing', 'crosshair');
+    document.body.style.cursor = '';
+  }
+  if (OverflowAndroid.cursorScrollable)
+    { that.elmView.style.cursor = OverflowAndroid.cursorScrollable; }
 
   // check `transform` for positioning is usable
   if (!positionTo) {
@@ -158,8 +167,11 @@ function OverflowAndroid(target) {
     // start point of cursor / scroll value
     startPoint = {x: e.pointers[0].clientX, y: e.pointers[0].clientY};
     startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
-    that.elmView.style.cursor = '';
-    setStyleValue(document.body, 'cursor', 'grabbing', 'crosshair');
+
+    if (OverflowAndroid.cursorScrollable) { that.elmView.style.cursor = ''; }
+    if (OverflowAndroid.cursorScrolling)
+      { document.body.style.cursor = OverflowAndroid.cursorScrolling; }
+
     e.preventDefault();
   })
   .on('panmove', function(e) {
@@ -177,8 +189,9 @@ function OverflowAndroid(target) {
     if (e.timeStamp - panmoveTime > PANSTOP_INTERVAL) { // reset
       inertia = that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     }
-    setStyleValue(that.elmView, 'cursor', 'grab', 'move');
-    document.body.style.cursor = '';
+    if (OverflowAndroid.cursorScrollable)
+      { that.elmView.style.cursor = OverflowAndroid.cursorScrollable; }
+    if (OverflowAndroid.cursorScrolling) { document.body.style.cursor = ''; }
 
     // Init inertia scroll animation
     inertia.x.direction = inertia.x.velocity > 0 ? 1 : -1;

@@ -1,6 +1,6 @@
 # OverflowAndroid
 
-The polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.
+Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.
 
 Android browser has problems as below:
 
@@ -127,11 +127,22 @@ The CSS Animations work smoothly in many browsers, but some browsers (particular
 This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. `60` as default.  
 This is ignored when CSS Animations (see `OverflowAndroid.transition`) is used.
 
+### `OverflowAndroid.cursorScrollable`
+Default: ![grab](grab.png)
+
+The CSS `cursor` value when the target element is not receiving scroll operations.
+
+### `OverflowAndroid.cursorScrolling`
+Default: ![grabbing](grabbing.png)
+
+The CSS `cursor` value when the target element is receiving scroll operations.
+
 ## See Also
 
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-10-05			v0.6.0			Add: `cursorScrollable` and `cursorScrolling` options.
  * 2014-10-05			v0.5.0			Support `scroll` event.
  * 2014-09-26			v0.4.10			Fix: `scrollLeft()` and `scrollTop()` of disabled instance fail.
  * 2014-09-23			v0.4.9			`initSize()` accepts position.
