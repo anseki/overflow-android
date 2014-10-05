@@ -5,7 +5,7 @@
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="OverflowAndroid : The polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.">
+    <meta name="description" content="OverflowAndroid : Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.">
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/sample.css">
@@ -25,7 +25,7 @@
           <a id="forkme_banner" href="https://github.com/anseki/overflow-android">View on GitHub</a>
 
           <h1 id="project_title">OverflowAndroid</h1>
-          <h2 id="project_tagline">The polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.</h2>
+          <h2 id="project_tagline">Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.</h2>
 
             <section id="downloads">
               <a class="zip_download_link" href="https://github.com/anseki/overflow-android/zipball/master">Download this project as a .zip file</a>
@@ -38,7 +38,9 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
 
-<p>The polyfill for <code>overflow:scroll</code> / <code>overflow:auto</code> and <code>element.scrollLeft</code> / <code>element.scrollTop</code> on Android browser.</p>
+<p>Implement the inertia scroll for <code>overflow</code> element. And the polyfill for <code>overflow:scroll</code> / <code>overflow:auto</code> and <code>element.scrollLeft</code> / <code>element.scrollTop</code> on Android browser.</p>
+
+<p>The desktop can implement UI that scrolls by mouse drag, inertia scroll like touch device. And problems of Android are solved.</p>
 
 <p>Android browser has problems as below:</p>
 
@@ -138,6 +140,27 @@ This work equals <code>element.scrollTop</code> property.</p>
 If you changed the size of elements, you must call this method. If arguments are given, the size of elements is computed and the element scrolls to specified position.</p>
 
 <h2>
+<a name="event" class="anchor" href="#event"><span class="octicon octicon-link"></span></a>Event</h2>
+
+<p>The <code>scroll</code> event is fired when the target element has been scrolled. The <code>Event</code> object that is passed to event listeners has an additional property below.</p>
+
+<h3>
+<a name="inertia" class="anchor" href="#inertia"><span class="octicon octicon-link"></span></a><code>inertia</code>
+</h3>
+
+<p>Type: Boolean</p>
+
+<p>Indicate whether the current event was fired by inertia scroll after fast scroll operations. i.e. user isn't touching the element now, if this is <code>true</code>.</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-js"><pre><span class="nx">element</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'scroll'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'left: '</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">+</span>
+    <span class="s1">', top: '</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">+</span> <span class="s1">', more scrolling: '</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">inertia</span><span class="p">);</span>
+<span class="p">},</span> <span class="kc">false</span><span class="p">);</span>
+</pre></div>
+
+<h2>
 <a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
 
 <p>You can tune the behavior of OverflowAndroid via options below.</p>
@@ -162,13 +185,13 @@ If you changed the size of elements, you must call this method. If arguments are
 <a name="overflowandroidfriction" class="anchor" href="#overflowandroidfriction"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.friction</code>
 </h3>
 
-<p>This is strength of slowdown of inertia scroll animation for fast scroll operations. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
+<p>This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
 
 <h3>
 <a name="overflowandroidtransition" class="anchor" href="#overflowandroidtransition"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.transition</code>
 </h3>
 
-<p>If <code>true</code> is specified to this option, the inertia scroll animation for fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
+<p>If <code>true</code> is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
 <p>The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <strong>Someone, please let me know the way.</strong> (But Firefox for Android can't scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
 
@@ -176,8 +199,24 @@ If you changed the size of elements, you must call this method. If arguments are
 <a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>
 </h3>
 
-<p>This is frame rate of inertia scroll animation for fast scroll operations. This is a number of frames per second. <code>60</code> as default.<br>
-This is ignored when that animation uses CSS Animations (see <code>OverflowAndroid.transition</code>).</p>
+<p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. <code>60</code> as default.<br>
+This is ignored when CSS Animations (see <code>OverflowAndroid.transition</code>) is used.</p>
+
+<h3>
+<a name="overflowandroidcursorscrollable" class="anchor" href="#overflowandroidcursorscrollable"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.cursorScrollable</code>
+</h3>
+
+<p>Default: <img src="images/grab.png" alt="grab"></p>
+
+<p>The CSS <code>cursor</code> value when the target element is not receiving scroll operations.</p>
+
+<h3>
+<a name="overflowandroidcursorscrolling" class="anchor" href="#overflowandroidcursorscrolling"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.cursorScrolling</code>
+</h3>
+
+<p>Default: <img src="images/grabbing.png" alt="grabbing"></p>
+
+<p>The CSS <code>cursor</code> value when the target element is receiving scroll operations.</p>
 
 <h2>
 <a name="see-also" class="anchor" href="#see-also"><span class="octicon octicon-link"></span></a>See Also</h2>
