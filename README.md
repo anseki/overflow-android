@@ -141,12 +141,14 @@ This is ignored when CSS Animations (see `OverflowAndroid.transition`) is used.
 ### `OverflowAndroid.cursorScrollable`
 Default: ![grab](grab.png)
 
-The CSS `cursor` value when the target element is not receiving scroll operations.
+The CSS `cursor` value when the target element is not receiving scroll operations.  
+If `''` is specified, `cursor` is not changed.
 
 ### `OverflowAndroid.cursorScrolling`
 Default: ![grabbing](grabbing.png)
 
-The CSS `cursor` value when the target element is receiving scroll operations.
+The CSS `cursor` value when the target element is receiving scroll operations.  
+If `''` is specified, `cursor` is not changed.
 
 ## See Also
 
