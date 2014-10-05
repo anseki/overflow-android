@@ -140,11 +140,11 @@ function OverflowAndroid(target) {
   })();
 
   Object.defineProperty(that.elmView, 'scrollLeft', {
-    get: function() { return that.scrollValue.left; },
+    get: function() { return that.scrollLeft(); },
     set: function(left) { that.scrollLeft(left); }
   });
   Object.defineProperty(that.elmView, 'scrollTop', {
-    get: function() { return that.scrollValue.top; },
+    get: function() { return that.scrollTop(); },
     set: function(top) { that.scrollTop(top); }
   });
 
@@ -177,7 +177,7 @@ function OverflowAndroid(target) {
   .on('panmove', function(e) {
     if (!that.enable) { return; }
     // to minus -> scroll to plus
-    that.scroll(startScroll.left + startPoint.x - e.pointers[0].clientX,
+    _scroll(that, startScroll.left + startPoint.x - e.pointers[0].clientX,
       startScroll.top + startPoint.y - e.pointers[0].clientY);
     that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     panmoveTime = e.timeStamp;
@@ -250,18 +250,17 @@ OverflowAndroid.prototype.initSize = function(left, top) {
     { this.positionMin.top = this.positionMax.top; }
   this.scrollMax.top = this.positionMax.top - this.positionMin.top;
 
-  this.scroll(left, top, true);
+  _scroll(this, left, top, true);
 
   return this;
 };
 
-OverflowAndroid.prototype.scrollLeft =
-  function(left) { return this.scroll(left, undefined).left; };
-OverflowAndroid.prototype.scrollTop =
-  function(top) { return this.scroll(undefined, top).top; };
+OverflowAndroid.prototype.scrollLeft = function(left) { return this.scroll(left, undefined).left; };
+OverflowAndroid.prototype.scrollTop = function(top) { return this.scroll(undefined, top).top; };
+OverflowAndroid.prototype.scroll = function(left, top) { return _scroll(this, left, top); };
 
-OverflowAndroid.prototype.scroll = function(left, top, force) {
-  var that = this, scrollValue = that.scrollValue,
+function _scroll(that, left, top, force, inertia) {
+  var scrollValue = that.scrollValue,
     newValue = {left: left, top: top}, update;
   if (!that.enable) { return scrollValue; }
 
@@ -276,13 +275,14 @@ OverflowAndroid.prototype.scroll = function(left, top, force) {
 
   if ((update = newValue.left !== scrollValue.left ||
       newValue.top !== scrollValue.top) || force) {
+    if (!inertia) { inertiaScrollStop(that); }
     scrollValue.left = newValue.left;
     scrollValue.top = newValue.top;
     positionTo(that, scrollValue);
     if (update) { scrollEvent(that.elmView, that.inertia.isScrolling); } // fire event
   }
   return scrollValue;
-};
+}
 
 function scrollValue2position(that, direction, scrollValue) {
   /*
@@ -461,7 +461,7 @@ function _inertiaScrollLegacyInterval(that) {
       } else { axisInertia.velocity = 0; }
     }
   });
-  resValue = that.scroll(newValue.left, newValue.top);
+  resValue = _scroll(that, newValue.left, newValue.top, false, true);
   DIRECTIONS.forEach(function(direction) {
     var axisInertia = inertia[direction.xy];
     if (newValue[direction.lt] !== undefined &&
