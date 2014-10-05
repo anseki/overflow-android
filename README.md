@@ -95,6 +95,15 @@ Type: Boolean
 
 Indicate whether the current event was fired by inertia scroll after fast scroll operations. i.e. user isn't touching the element now, if this is `true`.
 
+Example:
+
+```js
+element.addEventListener('scroll', function(e) {
+  console.log('left: ' + e.target.scrollLeft +
+    ', top: ' + e.target.scrollTop + ', more scrolling: ' + e.inertia);
+}, false);
+```
+
 ## Options
 
 You can tune the behavior of OverflowAndroid via options below.
