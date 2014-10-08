@@ -81,10 +81,12 @@ function OverflowAndroid(target) {
   })();
 
   if (OverflowAndroid.cursorScrollable === undefined) {
-    OverflowAndroid.cursorScrollable = setStyleValue(that.elmView, 'cursor', 'grab', 'move');
+    OverflowAndroid.cursorScrollable =
+      setStyleValue(that.elmView, 'cursor', ['grab', 'all-scroll']);
   }
   if (OverflowAndroid.cursorScrolling === undefined) {
-    OverflowAndroid.cursorScrolling = setStyleValue(document.body, 'cursor', 'grabbing', 'crosshair');
+    OverflowAndroid.cursorScrolling =
+      setStyleValue(document.body, 'cursor', ['grabbing', 'move']);
     document.body.style.cursor = '';
   }
   if (OverflowAndroid.cursorScrollable)
@@ -500,6 +502,7 @@ function setStyles(elm, styles) {
 (function() {
   var PREFIXES = ['webkit', 'ms', 'moz', 'o'],
     PREFIXES_PROP = [], PREFIXES_VALUE = [],
+    rePrefixesProp, rePrefixesValue,
     props = {}, values = {}; // cache
 
   function ucf(text) { return text.substr(0, 1).toUpperCase() + text.substr(1); }
@@ -510,8 +513,22 @@ function setStyles(elm, styles) {
     PREFIXES_VALUE.push('-' + prefix + '-');
   });
 
+  rePrefixesProp = new RegExp('^(?:' + PREFIXES.join('|') + ')(.)', 'i');
+  function removePrefixesProp(prop) {
+    var reUc = /[A-Z]/;
+    return prop.replace(rePrefixesProp, function(str, p1) {
+      return reUc.test(p1) ? p1.toLowerCase() : str;
+    });
+  }
+
+  rePrefixesValue = new RegExp('^(?:' + PREFIXES_VALUE.join('|') + ')', 'i');
+  function removePrefixesValue(value) {
+    return value.replace(rePrefixesValue, '');
+  }
+
   getStyleProp = function(prop, elm) {
     var style, ucfProp;
+    prop = removePrefixesProp(prop);
     if (props[prop] === undefined) {
       style = elm.style;
 
@@ -520,41 +537,58 @@ function setStyles(elm, styles) {
       } else { // try with prefixes
         ucfProp = ucf(prop);
         if (!PREFIXES_PROP.some(function(prefix) {
-            if (style[prefix + ucfProp] !== undefined) {
-              props[prop] = prefix + ucfProp;
-              return true;
-            }
-          })) { props[prop] = ''; }
+              var prefixed = prefix + ucfProp;
+              if (style[prefixed] !== undefined) {
+                props[prop] = prefixed;
+                return true;
+              }
+            })) {
+          props[prop] = '';
+        }
       }
 
     }
     return props[prop];
   };
 
-  setStyleValue = function(elm, prop, value, alt) {
-    var style = elm.style;
+  setStyleValue = function(elm, prop, value) {
+    var res, style = elm.style,
+      valueArray = Array.isArray(value) ? value : [value];
 
     function trySet(prop, value) {
       style[prop] = value;
       return style[prop] === value;
     }
 
-    if (!values[prop] || values[prop][value] === undefined) {
-      values[prop] = values[prop] || {};
+    values[prop] = values[prop] || {};
+    if (!valueArray.some(function(value) {
+          value = removePrefixesValue(value);
+          if (values[prop][value] === undefined) {
 
-      if (trySet(prop, value)) { // original
-        values[prop][value] = value;
-      } else if (!PREFIXES_VALUE.some(function(prefix) { // try with prefixes
-            if (trySet(prop, prefix + value)) {
-              values[prop][value] = prefix + value;
+            if (trySet(prop, value)) { // original
+              res = values[prop][value] = value;
               return true;
+            } else if (PREFIXES_VALUE.some(function(prefix) { // try with prefixes
+                  var prefixed = prefix + value;
+                  if (trySet(prop, prefixed)) {
+                    res = values[prop][value] = prefixed;
+                    return true;
+                  }
+                })) {
+              return true;
+            } else {
+              values[prop][value] = '';
+              return; // continue to next value
             }
-          })) {
-        values[prop][value] = alt && trySet(prop, alt) ? alt : '';
-      }
 
-    } else if (values[prop][value]) { style[prop] = values[prop][value]; }
-    return values[prop][value];
+          } else if (values[prop][value]) {
+            style[prop] = res = values[prop][value];
+            return true;
+          }
+        })) {
+      res = '';
+    }
+    return res;
   };
 })();
 
