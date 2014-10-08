@@ -261,6 +261,14 @@ OverflowAndroid.prototype.scrollLeft = function(left) { return this.scroll(left,
 OverflowAndroid.prototype.scrollTop = function(top) { return this.scroll(undefined, top).top; };
 OverflowAndroid.prototype.scroll = function(left, top) { return _scroll(this, left, top); };
 
+OverflowAndroid.prototype.stop = function() {
+  inertiaScrollStop(this);
+  if (OverflowAndroid.cursorScrollable)
+    { this.elmView.style.cursor = OverflowAndroid.cursorScrollable; }
+  if (OverflowAndroid.cursorScrolling) { document.body.style.cursor = ''; }
+  return this;
+};
+
 function _scroll(that, left, top, force, inertia) {
   var scrollValue = that.scrollValue,
     newValue = {left: left, top: top}, update;

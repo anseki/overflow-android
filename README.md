@@ -76,10 +76,18 @@ currentLeftTop = overflowA.scroll([newLeft[, newTop]])
 
 Return the Object that has `left` as the number of pixels that the element's content is scrolled to the left, and `top` as the number of pixels that the element's content is scrolled upward. If arguments are given, the element scrolls to specified position and it is returned.
 
+### `stop`
+
+```js
+self = overflowA.stop()
+```
+
+Stop scroll immediately.
+
 ### `initSize`
 
 ```js
-overflowA.initSize([newLeft[, newTop]])
+self = overflowA.initSize([newLeft[, newTop]])
 ```
 
 OverflowAndroid computes the size of elements for scroll. It computes again automatically when a window is resized. Therefore you usually don't need to call this method.  
@@ -155,6 +163,7 @@ If `''` is specified, `cursor` is not changed.
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-10-09			v0.7.0			Add `stop` method.
  * 2014-10-09			v0.6.2			Change alternative `cursor` value.
  * 2014-10-06			v0.6.1			Fix: inertia scroll is not canceled by another scroll.
  * 2014-10-05			v0.6.0			Add: `cursorScrollable` and `cursorScrolling` options.
