@@ -164,10 +164,12 @@ function OverflowAndroid(target) {
     ]
   })
   .on('panstart', function(e) {
+    var pointer;
     if (!that.enable) { return; }
+    pointer = e.pointers[0];
     inertiaScrollStop(that);
     // start point of cursor / scroll value
-    startPoint = {x: e.pointers[0].clientX, y: e.pointers[0].clientY};
+    startPoint = {x: pointer.clientX, y: pointer.clientY};
     startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
 
     if (OverflowAndroid.cursorScrollable) { that.elmView.style.cursor = ''; }
@@ -177,10 +179,12 @@ function OverflowAndroid(target) {
     e.preventDefault();
   })
   .on('panmove', function(e) {
+    var pointer;
     if (!that.enable) { return; }
+    pointer = e.pointers[0];
     // to minus -> scroll to plus
-    _scroll(that, startScroll.left + startPoint.x - e.pointers[0].clientX,
-      startScroll.top + startPoint.y - e.pointers[0].clientY);
+    _scroll(that, startScroll.left + startPoint.x - pointer.clientX,
+      startScroll.top + startPoint.y - pointer.clientY);
     that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     panmoveTime = e.timeStamp;
     e.preventDefault();
