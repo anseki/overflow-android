@@ -33,6 +33,7 @@
                       }
     hammer          : Hammer.Manager
     enable
+    elmUndoAnc      : for browsers (Chrome) unsupport G(S)etter method
 */
 
 var OverflowAndroid = (function(undefined) {
@@ -51,38 +52,38 @@ var
   positionTo, inertiaScroll, inertiaScrollStop,
   // CSS properties
   propTransform, propTrstProperty, propTrstDuration, propTrstTFunction,
-  getStyleProp, setStyleValue; // util methods
+  getStyleProp, setStyleValue, undoNativeScroll; // util methods
 
 function OverflowAndroid(target) {
-  var that = this, startPoint, startScroll, panmoveTime;
+  var that = this, elmView, elmContent, startPoint, startScroll, panmoveTime;
 
-  that.elmView = target;
+  elmView = that.elmView = target;
   if (!OverflowAndroid.enable ||
-    !Array.prototype.some.call(that.elmView.childNodes, function(node) {
+    !Array.prototype.some.call(elmView.childNodes, function(node) {
       if (node.nodeType === 1) {
-        that.elmContent = node;
+        elmContent = that.elmContent = node;
         return true;
       }
     })) { return; }
 
   // Sometimes native properties have value. by reloading.
   (function() {
-    var style = that.elmContent.style,
+    var style = elmContent.style,
       styleWidth = style.width, styleHeight = style.height;
-    that.elmView.scrollLeft = that.elmView.scrollTop = 0;
-    that.elmView.style.overflow = 'hidden'; // properties may be restored
-    that.elmView.scrollLeft = that.elmView.scrollTop = 0; // set again
-    style.width = (that.elmView.offsetWidth + 100) + 'px'; // properties may be restored
-    style.height = (that.elmView.offsetHeight + 100) + 'px';
-    that.elmView.scrollLeft = that.elmView.scrollTop = 0; // set again
+    elmView.scrollLeft = elmView.scrollTop = 0;
+    elmView.style.overflow = 'hidden'; // properties may be restored
+    elmView.scrollLeft = elmView.scrollTop = 0; // set again
+    style.width = (elmView.offsetWidth + 100) + 'px'; // properties may be restored
+    style.height = (elmView.offsetHeight + 100) + 'px';
+    elmView.scrollLeft = elmView.scrollTop = 0; // set again
     style.width = styleWidth;
     style.height = styleHeight;
-    that.elmView.scrollLeft = that.elmView.scrollTop = 0; // set again
+    elmView.scrollLeft = elmView.scrollTop = 0; // set again
   })();
 
   if (OverflowAndroid.cursorScrollable === undefined) {
     OverflowAndroid.cursorScrollable =
-      setStyleValue(that.elmView, 'cursor', ['grab', 'all-scroll']);
+      setStyleValue(elmView, 'cursor', ['grab', 'all-scroll']);
   }
   if (OverflowAndroid.cursorScrolling === undefined) {
     OverflowAndroid.cursorScrolling =
@@ -90,18 +91,18 @@ function OverflowAndroid(target) {
     document.body.style.cursor = '';
   }
   if (OverflowAndroid.cursorScrollable)
-    { that.elmView.style.cursor = OverflowAndroid.cursorScrollable; }
+    { elmView.style.cursor = OverflowAndroid.cursorScrollable; }
 
   // check `transform` for positioning is usable
   if (!positionTo) {
-    positionTo = (propTransform = getStyleProp('transform', that.elmContent)) ?
+    positionTo = (propTransform = getStyleProp('transform', elmContent)) ?
       _positionTo : _positionToLegacy;
   }
   // init for positioning
   if (positionTo !== _positionTo) { // legacy
-    if (window.getComputedStyle(that.elmView, '').position === 'static')
-      { that.elmView.style.position = 'relative'; }
-    that.elmContent.style.position = 'absolute';
+    if (window.getComputedStyle(elmView, '').position === 'static')
+      { elmView.style.position = 'relative'; }
+    elmContent.style.position = 'absolute';
   }
   // window.console.log('Positioning M-mode: ' + (positionTo === _positionTo));
 
@@ -109,9 +110,9 @@ function OverflowAndroid(target) {
   if (!inertiaScroll) {
     if (OverflowAndroid.transition &&
         positionTo === _positionTo && // If transition is OK, maybe transform is OK too.
-        (propTrstProperty = getStyleProp('transitionProperty', that.elmContent))) {
-      propTrstDuration = getStyleProp('transitionDuration', that.elmContent);
-      propTrstTFunction = getStyleProp('transitionTimingFunction', that.elmContent);
+        (propTrstProperty = getStyleProp('transitionProperty', elmContent))) {
+      propTrstDuration = getStyleProp('transitionDuration', elmContent);
+      propTrstTFunction = getStyleProp('transitionTimingFunction', elmContent);
       inertiaScroll = _inertiaScroll;
       inertiaScrollStop = _inertiaScrollStop;
     } else { // legacy
@@ -123,29 +124,35 @@ function OverflowAndroid(target) {
   if (inertiaScroll === _inertiaScroll) {
     ['transitionend', 'webkitTransitionEnd', 'msTransitionEnd',
         'MozTransitionEnd', 'oTransitionEnd'].forEach(function(type) {
-      that.elmContent.addEventListener(type,
+      elmContent.addEventListener(type,
         function(e) { _inertiaScrollStop(that, e); }, false);
     });
-    that.elmContent.style[propTrstProperty] = propTransform;
+    elmContent.style[propTrstProperty] = propTransform;
   }
   // window.console.log('Animation M-mode: ' + (inertiaScroll === _inertiaScroll));
 
   // for hardware acceleration
   (function() {
     var styles = {};
-    styles[getStyleProp('transform', that.elmView)] = 'translateZ(0)';
-    styles[getStyleProp('perspective', that.elmView)] = '1000';
-    styles[getStyleProp('backfaceVisibility', that.elmView)] = 'hidden';
-    styles[getStyleProp('tapHighlightColor', that.elmView)] = 'rgba(0, 0, 0, 0)';
-    styles[getStyleProp('boxShadow', that.elmView)] = '0 0 1px rgba(0, 0, 0, 0)';
-    [that.elmView, that.elmContent].forEach(function(elm) { setStyles(elm, styles); });
+    styles[getStyleProp('transform', elmView)] = 'translateZ(0)';
+    styles[getStyleProp('perspective', elmView)] = '1000';
+    styles[getStyleProp('backfaceVisibility', elmView)] = 'hidden';
+    styles[getStyleProp('tapHighlightColor', elmView)] = 'rgba(0, 0, 0, 0)';
+    styles[getStyleProp('boxShadow', elmView)] = '0 0 1px rgba(0, 0, 0, 0)';
+    [elmView, elmContent].forEach(function(elm) { setStyles(elm, styles); });
   })();
 
-  Object.defineProperty(that.elmView, 'scrollLeft', {
+  // Native getter/setter methods scrollLeft/scrollTop
+  if (!undoNativeScroll) { undoNativeScroll = getUndoNativeScroll(elmView); }
+  elmView.addEventListener('scroll', function(e) {
+    if (e.inertia === undefined) { undoNativeScroll(that); } // undo native scroll
+  });
+
+  Object.defineProperty(elmView, 'scrollLeft', {
     get: function() { return that.scrollLeft(); },
     set: function(left) { that.scrollLeft(left); }
   });
-  Object.defineProperty(that.elmView, 'scrollTop', {
+  Object.defineProperty(elmView, 'scrollTop', {
     get: function() { return that.scrollTop(); },
     set: function(top) { that.scrollTop(top); }
   });
@@ -157,7 +164,7 @@ function OverflowAndroid(target) {
   items.push(that.initSize());
 
   // Events
-  that.hammer = new Hammer.Manager(that.elmView, {
+  that.hammer = new Hammer.Manager(elmView, {
     recognizers: [
       [Hammer.Pan, {threshold: 3}]/*,
       [Hammer.Swipe]*/
@@ -172,7 +179,7 @@ function OverflowAndroid(target) {
     startPoint = {x: pointer.clientX, y: pointer.clientY};
     startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
 
-    if (OverflowAndroid.cursorScrollable) { that.elmView.style.cursor = ''; }
+    if (OverflowAndroid.cursorScrollable) { elmView.style.cursor = ''; }
     if (OverflowAndroid.cursorScrolling)
       { document.body.style.cursor = OverflowAndroid.cursorScrolling; }
 
@@ -196,7 +203,7 @@ function OverflowAndroid(target) {
       inertia = that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     }
     if (OverflowAndroid.cursorScrollable)
-      { that.elmView.style.cursor = OverflowAndroid.cursorScrollable; }
+      { elmView.style.cursor = OverflowAndroid.cursorScrollable; }
     if (OverflowAndroid.cursorScrolling) { document.body.style.cursor = ''; }
 
     // Init inertia scroll animation
@@ -220,15 +227,16 @@ function OverflowAndroid(target) {
 }
 
 OverflowAndroid.prototype.initSize = function(left, top) {
-  var viewWidth, viewHeight, viewStyle, contentWidth, contentHeight, contentStyle;
+  var elmView = this.elmView, elmContent = this.elmContent,
+    viewWidth, viewHeight, viewStyle, contentWidth, contentHeight, contentStyle;
   if (!this.enable) { return this; }
 
-  viewWidth = this.elmView.clientWidth;
-  viewHeight = this.elmView.clientHeight;
-  viewStyle = window.getComputedStyle(this.elmView, '');
-  contentWidth = this.elmContent.offsetWidth;
-  contentHeight = this.elmContent.offsetHeight;
-  contentStyle = window.getComputedStyle(this.elmContent, '');
+  viewWidth = elmView.clientWidth;
+  viewHeight = elmView.clientHeight;
+  viewStyle = window.getComputedStyle(elmView, '');
+  contentWidth = elmContent.offsetWidth;
+  contentHeight = elmContent.offsetHeight;
+  contentStyle = window.getComputedStyle(elmContent, '');
 
   this.positionMin.left = viewWidth - contentWidth -
     parseFloat(viewStyle.paddingRight) - parseFloat(contentStyle.marginRight);
@@ -256,6 +264,7 @@ OverflowAndroid.prototype.initSize = function(left, top) {
     { this.positionMin.top = this.positionMax.top; }
   this.scrollMax.top = this.positionMax.top - this.positionMin.top;
 
+  undoNativeScroll(this);
   _scroll(this, left, top, true);
 
   return this;
@@ -708,6 +717,100 @@ function getPointOnPath(p0, p1, p2, p3, t) {
     toP2:   {x: cx, y: cy},
     angle:  angle
   };
+}
+
+function getUndoNativeScroll(elm) {
+  var nativeScrollLeft, nativeScrollTop;
+
+  function getGSetter(prop) {
+    // Chrome http://code.google.com/p/chromium/issues/detail?id=13175
+    var gsetter;
+
+    function _getGSetter(target) {
+      var propDesc, getter, setter;
+      if (!target) { return; }
+      try {
+        if ((propDesc = Object.getOwnPropertyDescriptor(target, prop)) &&
+            propDesc.get && propDesc.set)
+          { return {get: propDesc.get, set: propDesc.set}; }
+      } catch (e) {}
+      try {
+        if ((getter = target.__lookupGetter__(prop)) &&
+            (setter = target.__lookupSetter__(prop)))
+          { return {get: getter, set: setter}; }
+      } catch (e) {}
+    }
+
+    //================ Instance
+    if ((gsetter = _getGSetter(elm))) { return gsetter; }
+    //================ getPrototypeOf
+    try {
+      if ((gsetter = _getGSetter(Object.getPrototypeOf(elm)))) { return gsetter; }
+    } catch (e) {}
+    //================ constructor.prototype
+    try {
+      if ((gsetter = _getGSetter(elm.constructor.prototype))) { return gsetter; }
+    } catch (e) {}
+    //================ Element.prototype
+    try {
+      if ((gsetter = _getGSetter(Element.prototype))) { return gsetter; }
+    } catch (e) {}
+    //================ constructor.__proto__
+    try {
+/* jshint -W103 */
+      if ((gsetter = _getGSetter(elm.constructor.__proto__))) { return gsetter; }
+/* jshint +W103 */
+    } catch (e) {}
+    //================ __proto__
+    try {
+/* jshint -W103 */
+      if ((gsetter = _getGSetter(elm.__proto__))) { return gsetter; }
+/* jshint +W103 */
+    } catch (e) {}
+  }
+
+  return (nativeScrollLeft = getGSetter('scrollLeft')) &&
+      (nativeScrollTop = getGSetter('scrollTop')) ?
+    function(that) { // Firefox, etc.
+      var elmView = that.elmView,
+        scrolled = {left: nativeScrollLeft.get.call(elmView), top: nativeScrollTop.get.call(elmView)};
+      if (scrolled.left) { nativeScrollLeft.set.call(elmView, 0); }
+      if (scrolled.top) { nativeScrollTop.set.call(elmView, 0); }
+      return scrolled;
+    } :
+    function(that) { // Chrome
+      var elmView = that.elmView, elmContent = that.elmContent,
+        elmAnc = that.elmUndoAnc || (function() { // Add anchor
+            var viewStyle = window.getComputedStyle(elmView, ''),
+              contentStyle = window.getComputedStyle(elmContent, '');
+              elm = document.createElement('a');
+            elm.innerHTML = 'x'; // empty element is ignored by getBoundingClientRect()
+            elm.setAttribute('href', '#');
+            setStyles(elmContent.insertBefore(elm, elmContent.firstChild), {
+              position: 'relative',
+              left: '-' + (elm.offsetWidth + parseFloat(contentStyle.paddingLeft) +
+                      parseFloat(contentStyle.borderLeftWidth) + parseFloat(contentStyle.marginLeft) +
+                      parseFloat(viewStyle.paddingLeft)) + 'px',
+              top:  '-' + (elm.offsetHeight + parseFloat(contentStyle.paddingTop) +
+                      parseFloat(contentStyle.borderTopWidth) + parseFloat(contentStyle.marginTop) +
+                      parseFloat(viewStyle.paddingTop)) + 'px'
+            });
+            return (that.elmUndoAnc = elm);
+          })(),
+        winLeft = window.pageXOffset,
+        winTop = window.pageYOffset,
+        style = elmAnc.style, rect1, rect2;
+      // elmAnc.scrollIntoView();
+      // Not work on Opera (`left` is not changed)
+      style.display = 'inline';
+      rect1 = elmAnc.getBoundingClientRect();
+      elmAnc.focus();
+      if (window.pageXOffset !== winLeft || window.pageYOffset !== winTop)
+        { window.scrollTo(winLeft, winTop); }
+      rect2 = elmAnc.getBoundingClientRect();
+      style.display = 'none';
+      return {left: rect2.left - rect1.left, top: rect2.top - rect1.top};
+    };
 }
 
 OverflowAndroid.enable = ('ontouchstart' in window)/* && (navigator.userAgent.indexOf('Firefox') < 0)*/;

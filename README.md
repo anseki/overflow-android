@@ -163,6 +163,7 @@ If `''` is specified, `cursor` is not changed.
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
 
 ## History
+ * 2014-10-31			v0.7.2			Fix: native scroll by focusing.
  * 2014-10-09			v0.7.0			Add `stop` method.
  * 2014-10-09			v0.6.2			Change alternative `cursor` value.
  * 2014-10-06			v0.6.1			Fix: inertia scroll is not canceled by another scroll.
