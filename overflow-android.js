@@ -33,7 +33,8 @@
                       }
     hammer          : Hammer.Manager
     enable
-    elmUndoAnc      : for browsers (Chrome) unsupport G(S)etter method
+    nScrollElmAnc      : for browsers (Chrome) unsupport G(S)etter method
+    nScrollOffset
 */
 
 var OverflowAndroid = (function(undefined) {
@@ -778,12 +779,12 @@ function getUndoNativeScroll(elm) {
       if (scrolled.top) { nativeScrollTop.set.call(elmView, 0); }
       return scrolled;
     } :
-    function(that) { // Chrome
+    function(that) { // Chrome/Webkit
       var elmView = that.elmView, elmContent = that.elmContent,
-        elmAnc = that.elmUndoAnc || (function() { // Add anchor
+        elmAnc = that.nScrollElmAnc || (function() { // Add anchor
             var viewStyle = window.getComputedStyle(elmView, ''),
-              contentStyle = window.getComputedStyle(elmContent, '');
-              elm = document.createElement('a');
+              contentStyle = window.getComputedStyle(elmContent, ''),
+              elm = document.createElement('a'), rectView, rectAnc;
             elm.innerHTML = 'x'; // empty element is ignored by getBoundingClientRect()
             elm.setAttribute('href', '#');
             setStyles(elmContent.insertBefore(elm, elmContent.firstChild), {
@@ -795,21 +796,36 @@ function getUndoNativeScroll(elm) {
                       parseFloat(contentStyle.borderTopWidth) + parseFloat(contentStyle.marginTop) +
                       parseFloat(viewStyle.paddingTop)) + 'px'
             });
-            return (that.elmUndoAnc = elm);
+            rectView = elmView.getBoundingClientRect();
+            rectAnc = elm.getBoundingClientRect();
+            that.nScrollOffset = {left: rectAnc.left - rectView.left, top: rectAnc.top - rectView.top};
+            return (that.nScrollElmAnc = elm);
           })(),
-        winLeft = window.pageXOffset,
-        winTop = window.pageYOffset,
-        style = elmAnc.style, rect1, rect2;
-      // elmAnc.scrollIntoView();
-      // Not work on Opera (`left` is not changed)
+        style = elmAnc.style, winLeft, winTop, scrolled, scrolledFix;
+
+      function getScroll() { // DO style.display = 'inline'
+        var rectView = elmView.getBoundingClientRect(), rectAnc = elmAnc.getBoundingClientRect(),
+          nScrollOffset = that.nScrollOffset;
+        return {left: rectView.left + nScrollOffset.left - rectAnc.left,
+          top: rectView.top + nScrollOffset.top - rectAnc.top};
+      }
+
       style.display = 'inline';
-      rect1 = elmAnc.getBoundingClientRect();
-      elmAnc.focus();
-      if (window.pageXOffset !== winLeft || window.pageYOffset !== winTop)
-        { window.scrollTo(winLeft, winTop); }
-      rect2 = elmAnc.getBoundingClientRect();
+      scrolled = getScroll();
+      if (scrolled.left || scrolled.top) {
+        // elmAnc.scrollIntoView();
+        // Not work on Opera (`left` is not changed)
+        winLeft = window.pageXOffset;
+        winTop = window.pageYOffset;
+        elmAnc.focus();
+        if (window.pageXOffset !== winLeft || window.pageYOffset !== winTop)
+          { window.scrollTo(winLeft, winTop); }
+        scrolledFix = getScroll(); // may be not 0
+        scrolled.left -= scrolledFix.left;
+        scrolled.top -= scrolledFix.top;
+      }
       style.display = 'none';
-      return {left: rect2.left - rect1.left, top: rect2.top - rect1.top};
+      return scrolled;
     };
 }
 
