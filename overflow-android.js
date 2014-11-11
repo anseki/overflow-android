@@ -85,14 +85,13 @@ function OverflowAndroid(target) {
   if (OverflowAndroid.cursorScrollable === undefined) {
     OverflowAndroid.cursorScrollable =
       setStyleValue(elmView, 'cursor', ['grab', 'all-scroll']);
+    elmView.style.cursor = '';
   }
   if (OverflowAndroid.cursorScrolling === undefined) {
     OverflowAndroid.cursorScrolling =
       setStyleValue(document.body, 'cursor', ['grabbing', 'move']);
     document.body.style.cursor = '';
   }
-  if (OverflowAndroid.cursorScrollable)
-    { elmView.style.cursor = OverflowAndroid.cursorScrollable; }
 
   // check `transform` for positioning is usable
   if (!positionTo) {
@@ -179,10 +178,7 @@ function OverflowAndroid(target) {
     // start point of cursor / scroll value
     startPoint = {x: pointer.clientX, y: pointer.clientY};
     startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
-
-    if (OverflowAndroid.cursorScrollable) { elmView.style.cursor = ''; }
-    if (OverflowAndroid.cursorScrolling)
-      { document.body.style.cursor = OverflowAndroid.cursorScrolling; }
+    setCursor(that, true);
 
     e.preventDefault();
   })
@@ -203,9 +199,7 @@ function OverflowAndroid(target) {
     if (e.timeStamp - panmoveTime > PANSTOP_INTERVAL) { // reset
       inertia = that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
     }
-    if (OverflowAndroid.cursorScrollable)
-      { elmView.style.cursor = OverflowAndroid.cursorScrollable; }
-    if (OverflowAndroid.cursorScrolling) { document.body.style.cursor = ''; }
+    setCursor(that);
 
     // Init inertia scroll animation
     inertia.x.direction = inertia.x.velocity > 0 ? 1 : -1;
@@ -267,6 +261,7 @@ OverflowAndroid.prototype.initSize = function(left, top) {
 
   undoNativeScroll(this);
   _scroll(this, left, top, true);
+  setCursor(this);
 
   return this;
 };
@@ -277,9 +272,7 @@ OverflowAndroid.prototype.scroll = function(left, top) { return _scroll(this, le
 
 OverflowAndroid.prototype.stop = function() {
   inertiaScrollStop(this);
-  if (OverflowAndroid.cursorScrollable)
-    { this.elmView.style.cursor = OverflowAndroid.cursorScrollable; }
-  if (OverflowAndroid.cursorScrolling) { document.body.style.cursor = ''; }
+  setCursor(this);
   return this;
 };
 
@@ -517,6 +510,21 @@ function setStyles(elm, styles) {
   var style = elm.style, prop;
   for (prop in styles) {
     if (styles.hasOwnProperty(prop)) { style[prop] = styles[prop]; }
+  }
+}
+
+function setCursor(that, scrolling) {
+  if (OverflowAndroid.cursorScrollable) {
+    that.elmView.style.cursor =
+      (that.scrollMax.left || that.scrollMax.top) && !scrolling ?   // Ready
+        OverflowAndroid.cursorScrollable :
+      '';                                                           // No scroll / Now scrolling
+  }
+  if (OverflowAndroid.cursorScrolling) {
+    document.body.style.cursor =
+      (that.scrollMax.left || that.scrollMax.top) && scrolling ?    // Now scrolling
+        OverflowAndroid.cursorScrolling :
+      '';                                                           // No scroll / Ready
   }
 }
 
