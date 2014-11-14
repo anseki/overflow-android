@@ -1,6 +1,6 @@
 {
   "name": "overflowandroid",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.",
   "keywords": [
     "inertia",
@@ -22,9 +22,7 @@
     "type": "git",
     "url": "git://github.com/anseki/overflow-android.git"
   },
-  "moduleType": [
-    "es6"
-  ],
+  "moduleType": [],
   "ignore": [
     "**/.*",
     "node_modules",
