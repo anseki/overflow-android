@@ -196,8 +196,9 @@ function OverflowAndroid(target) {
   .on('panend', function(e) {
     if (!that.enable) { return; }
     var inertia = that.inertia, rad;
-    if (e.timeStamp - panmoveTime > PANSTOP_INTERVAL) { // reset
-      inertia = that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}};
+    if (e.timeStamp - panmoveTime > PANSTOP_INTERVAL ||
+        inertia.x === undefined || inertia.y === undefined) { // panmove was not called
+      inertia = that.inertia = {x: {velocity: e.velocityX}, y: {velocity: e.velocityY}}; // reset
     }
     setCursor(that);
 
