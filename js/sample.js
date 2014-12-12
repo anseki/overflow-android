@@ -3,8 +3,8 @@
 OverflowAndroid.enable = true;
 $(function() {
   var ZOOM_MIN = 0.5, ZOOM_MAX = 2,
-    jqView = $('#view'),
-    jqContents = $('#contents'),
+    jqView = $('#sample-01'),
+    jqContents = $('#sample-01-contents'),
     overflowA = new OverflowAndroid(jqView.get(0)),
 
     offset = jqView.offset(),
@@ -36,10 +36,10 @@ $(function() {
       centerPoint.y * zoom - (e.center.y + winScroll.y - offset.top));
   });
 
-  $('#btn1').click(function() {
+  $('#sample-01-button-01').click(function() {
     jqView.get(0).scrollLeft = 80;
   });
-  $('#btn2').click(function() {
+  $('#sample-01-button-02').click(function() {
     jqView.animate({scrollLeft: 360, scrollTop: 150}, 1200);
   });
 });

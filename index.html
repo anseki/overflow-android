@@ -1,250 +1,176 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/syntax.css">
+  <link rel="stylesheet" href="css/default.css">
+  <link rel="stylesheet" href="css/sample.css">
 
-  <head>
-    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="OverflowAndroid : Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.">
+  <title>OverflowAndroid</title>
+</head>
+<body>
+  <div id="main-container">
+    <h1><a href="./">OverflowAndroid</a></h1>
+    <ul id="gh"><li><a href="https://github.com/anseki/overflow-android/tarball/master">Download TAR.GZ</a></li><li><a href="https://github.com/anseki/overflow-android/zipball/master">Download ZIP</a></li><li><a href="https://github.com/anseki/overflow-android">View on GitHub</a></li></ul>
+    <main>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/sample.css">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="javascripts/hammer.min.js"></script>
-    <script src="javascripts/overflow-android.min.js"></script>
-    <script src="javascripts/main.js"></script>
+<!-- include "sample_01a.html" -->
+<!-- ================ sample -->
+<p id="sample-01-device"><a href="m.html">Test page for mobile</a> (lightweight page)</p>
 
-    <title>OverflowAndroid</title>
-  </head>
-
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/anseki/overflow-android">View on GitHub</a>
-
-          <h1 id="project_title">OverflowAndroid</h1>
-          <h2 id="project_tagline">Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/anseki/overflow-android/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/anseki/overflow-android/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+<div id="sample-01">
+  <div id="sample-01-contents"><img src="img/00.jpg" width="900" height="600" alt="sample"></div>
+</div>
+<!-- ================ /sample -->
+<!-- /include "sample_01a.html" -->
 
 <p>Implement the inertia scroll for <code>overflow</code> element. And the polyfill for <code>overflow:scroll</code> / <code>overflow:auto</code> and <code>element.scrollLeft</code> / <code>element.scrollTop</code> on Android browser.</p>
 
 <p>The desktop can implement UI that scrolls by mouse drag, inertia scroll like touch device. And problems of Android browser are solved.</p>
 
+<!-- include "sample_01b.html" -->
+<!-- ================ sample -->
+<ul id="sample-01-description">
+  <li>This box accepts scroll operations (swipe, flick, drag, etc.).</li>
+  <li>This box can scroll via <code>element.scrollLeft</code> / <code>element.scrollTop</code>. <button id="sample-01-button-01">element.scrollLeft = 80</button></li>
+  <li>This box accepts pinch-in/out (zoom-in/out) operations. It works independent from body.</li>
+  <li>If jQuery is loaded, this box can scroll by jQuery animation. <button id="sample-01-button-02">$(element).animate({ scrollLeft: 360, scrollTop: 150 }, 1200)</button></li>
+</ul>
+
+<p>If you are using jQuery, you can choose jQuery plugin <a href="https://github.com/anseki/jquery-overflow-android">jQuery.overflowAndroid</a>.
+<!-- ================ /sample -->
+<!-- /include "sample_01b.html" -->
+
 <p>Android browser has problems as below:</p>
 
 <ul>
-<li>
-<code>overflow:scroll</code> and <code>overflow:auto</code> don't work on Android 2.x. The elements don't accept scroll operations (swipe, flick, drag, etc.).</li>
-<li>
-<code>element.scrollLeft</code> and <code>element.scrollTop</code> don't work on Android 4.0.x. The elements can't scroll via JavaScript. Strange to say, the element that is set <code>overflow:hidden</code> can scroll. But of course that element doesn't accept scroll operations.</li>
-</ul><p>OverflowAndroid solves above problems both.</p>
-
-<p style="font-weight: bold;"><a href="m.html">Test page for mobile</a> is lightweight page.</p>
-<!-- ======== sample -->
-<div id="view"><div id="contents"><img src="images/00.jpg" width="100%" height="100%" alt="sample"></div></div>
-
-<ul>
-  <li>This box accepts scroll operations (swipe, flick, drag, etc.).</li>
-  <li>This box can scroll via <code>element.scrollLeft</code> / <code>element.scrollTop</code>. <button id="btn1">element.scrollLeft = 80</button></li>
-  <li>This box accepts pinch-in/out (zoom-in/out) operations. It works independent from body.</li>
-  <li>If jQuery is loaded, this box can scroll by jQuery animation. <button id="btn2">$(element).animate({ scrollLeft: 360, scrollTop: 150 }, 1200)</button></li>
+<li><code>overflow:scroll</code> and <code>overflow:auto</code> don&#39;t work on Android 2.x. The elements don&#39;t accept scroll operations (swipe, flick, drag, etc.).</li>
+<li><code>element.scrollLeft</code> and <code>element.scrollTop</code> don&#39;t work on Android 4.0.x. The elements can&#39;t scroll via JavaScript. Strange to say, the element that is set <code>overflow:hidden</code> can scroll. But of course that element doesn&#39;t accept scroll operations.</li>
 </ul>
-<!-- ======== /sample -->
-<p>If you are using jQuery, you can choose jQuery plugin <a href="https://github.com/anseki/jquery-overflow-android">jQuery.overflowAndroid</a>.
 
-<h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<p>OverflowAndroid solves above problems both.</p>
+
+<h2 id="usage">Usage</h2>
 
 <p><a href="http://hammerjs.github.io/">Hammer.js</a> is required.</p>
-
-<div class="highlight highlight-html"><pre><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"hammer.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"overflow-android.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-</pre></div>
-
-<div class="highlight highlight-html"><pre><span class="c">&lt;!-- This `overflow:auto` isn't necessary. It works on desktop PC as native. --&gt;</span>
-<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"view"</span> <span class="na">style=</span><span class="s">"overflow: auto; width: 300px; height: 300px;"</span><span class="nt">&gt;</span>  <span class="c">&lt;!-- Like an iframe window --&gt;</span>
-  <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"photo.jpg"</span> <span class="na">width=</span><span class="s">"900"</span> <span class="na">height=</span><span class="s">"600"</span> <span class="na">alt=</span><span class="s">"sample"</span><span class="nt">&gt;</span>         <span class="c">&lt;!-- Like an iframe document --&gt;</span>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;hammer.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;overflow-android.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</code></pre></div><div class="highlight"><pre><code class="language-html" data-lang="html"><span class="c">&lt;!-- This `overflow:auto` isn&#39;t necessary. It works on desktop PC as native. --&gt;</span>
+<span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">&quot;view&quot;</span> <span class="na">style=</span><span class="s">&quot;overflow: auto; width: 300px; height: 300px;&quot;</span><span class="nt">&gt;</span>  <span class="c">&lt;!-- Like an iframe window --&gt;</span>
+  <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">&quot;photo.jpg&quot;</span> <span class="na">width=</span><span class="s">&quot;900&quot;</span> <span class="na">height=</span><span class="s">&quot;600&quot;</span> <span class="na">alt=</span><span class="s">&quot;sample&quot;</span><span class="nt">&gt;</span>         <span class="c">&lt;!-- Like an iframe document --&gt;</span>
 <span class="nt">&lt;/div&gt;</span>
-</pre></div>
-
-<div class="highlight highlight-js"><pre><span class="kd">var</span> <span class="nx">element</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'view'</span><span class="p">);</span>
+</code></pre></div><div class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">element</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;view&#39;</span><span class="p">);</span>
 <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">element</span><span class="p">);</span>
 <span class="c1">// Now, the element accepts scroll operations (swipe, flick, drag, etc.).</span>
 
 <span class="c1">// And it can scroll via scrollLeft/scrollTop.</span>
 <span class="nx">element</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>
-</pre></div>
+</code></pre></div>
+<h2 id="constructor">Constructor</h2>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">overflowA</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>OverflowAndroid</code> constructor accepts an element that is scrolling frame. It gets a first child element that includes contents and it moves when scrolling. The specified element like an <code>iframe</code> window, and the first child element like an <code>iframe</code> document.<br>That has already finished. Now, the specified element accepts scroll operations (swipe, flick, drag, etc.), and it can scroll via <code>scrollLeft</code>/<code>scrollTop</code>.<br>And the instance that is returned by constructor has some methods. (see below)<br><em>NOTE:</em> The contents that is included in specified element other than a first child element of it are ignored.</p>
 
-<h2>
-<a name="constructor" class="anchor" href="#constructor"><span class="octicon octicon-link"></span></a>Constructor</h2>
+<h2 id="methods">Methods</h2>
 
-<div class="highlight highlight-js"><pre><span class="nx">overflowA</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">OverflowAndroid</span><span class="p">(</span><span class="nx">element</span><span class="p">)</span>
-</pre></div>
+<h3 id="scrollleft"><code>scrollLeft</code></h3>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">currentLeft</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">])</span>
+</code></pre></div>
+<p>Return the number of pixels that the element&#39;s content is scrolled to the left. If an argument is given, the element scrolls to specified position and it is returned.<br>This work equals <code>element.scrollLeft</code> property.</p>
 
-<p>The <code>OverflowAndroid</code> constructor accepts an element that is scrolling frame. It gets a first child element that includes contents and it moves when scrolling. The specified element like an <code>iframe</code> window, and the first child element like an <code>iframe</code> document.<br>
-That has already finished. Now, the specified element accepts scroll operations (swipe, flick, drag, etc.), and it can scroll via <code>scrollLeft</code>/<code>scrollTop</code>.<br>
-And the instance that is returned by constructor has some methods. (see below)<br><em>NOTE:</em> The contents that is included in specified element other than a first child element of it are ignored.</p>
+<h3 id="scrolltop"><code>scrollTop</code></h3>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">currentTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">([</span><span class="nx">newTop</span><span class="p">])</span>
+</code></pre></div>
+<p>Return the number of pixels that the element&#39;s content is scrolled upward. If an argument is given, the element scrolls to specified position and it is returned.<br>This work equals <code>element.scrollTop</code> property.</p>
 
-<h2>
-<a name="methods" class="anchor" href="#methods"><span class="octicon octicon-link"></span></a>Methods</h2>
+<h3 id="scroll"><code>scroll</code></h3>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">currentLeftTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scroll</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
+</code></pre></div>
+<p>Return the Object that has <code>left</code> as the number of pixels that the element&#39;s content is scrolled to the left, and <code>top</code> as the number of pixels that the element&#39;s content is scrolled upward. If arguments are given, the element scrolls to specified position and it is returned.</p>
 
-<h3>
-<a name="scrollleft" class="anchor" href="#scrollleft"><span class="octicon octicon-link"></span></a><code>scrollLeft</code>
-</h3>
-
-<div class="highlight highlight-js"><pre><span class="nx">currentLeft</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">])</span>
-</pre></div>
-
-<p>Return the number of pixels that the element's content is scrolled to the left. If an argument is given, the element scrolls to specified position and it is returned.<br>
-This work equals <code>element.scrollLeft</code> property.</p>
-
-<h3>
-<a name="scrolltop" class="anchor" href="#scrolltop"><span class="octicon octicon-link"></span></a><code>scrollTop</code>
-</h3>
-
-<div class="highlight highlight-js"><pre><span class="nx">currentTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">([</span><span class="nx">newTop</span><span class="p">])</span>
-</pre></div>
-
-<p>Return the number of pixels that the element's content is scrolled upward. If an argument is given, the element scrolls to specified position and it is returned.<br>
-This work equals <code>element.scrollTop</code> property.</p>
-
-<h3>
-<a name="scroll" class="anchor" href="#scroll"><span class="octicon octicon-link"></span></a><code>scroll</code>
-</h3>
-
-<div class="highlight highlight-js"><pre><span class="nx">currentLeftTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scroll</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
-</pre></div>
-
-<p>Return the Object that has <code>left</code> as the number of pixels that the element's content is scrolled to the left, and <code>top</code> as the number of pixels that the element's content is scrolled upward. If arguments are given, the element scrolls to specified position and it is returned.</p>
-
-<h3>
-<a name="stop" class="anchor" href="#stop"><span class="octicon octicon-link"></span></a><code>stop</code>
-</h3>
-
-<div class="highlight highlight-js"><pre><span class="nx">self</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">stop</span><span class="p">()</span>
-</pre></div>
-
+<h3 id="stop"><code>stop</code></h3>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">self</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">stop</span><span class="p">()</span>
+</code></pre></div>
 <p>Stop scroll immediately.</p>
 
-<h3>
-<a name="initsize" class="anchor" href="#initsize"><span class="octicon octicon-link"></span></a><code>initSize</code>
-</h3>
+<h3 id="initsize"><code>initSize</code></h3>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">self</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">initSize</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
+</code></pre></div>
+<p>OverflowAndroid computes the size of elements for scroll. It computes again automatically when a window is resized. Therefore you usually don&#39;t need to call this method.<br>If you changed the size of elements, you must call this method. If arguments are given, the size of elements is computed and the element scrolls to specified position.</p>
 
-<div class="highlight highlight-js"><pre><span class="nx">self</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">initSize</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
-</pre></div>
-
-<p>OverflowAndroid computes the size of elements for scroll. It computes again automatically when a window is resized. Therefore you usually don't need to call this method.<br>
-If you changed the size of elements, you must call this method. If arguments are given, the size of elements is computed and the element scrolls to specified position.</p>
-
-<h2>
-<a name="event" class="anchor" href="#event"><span class="octicon octicon-link"></span></a>Event</h2>
+<h2 id="event">Event</h2>
 
 <p>The <code>scroll</code> event is fired when the target element has been scrolled. The <code>Event</code> object that is passed to event listeners has an additional property below.</p>
 
-<h3>
-<a name="inertia" class="anchor" href="#inertia"><span class="octicon octicon-link"></span></a><code>inertia</code>
-</h3>
+<h3 id="inertia"><code>inertia</code></h3>
 
 <p>Type: Boolean</p>
 
-<p>Indicate whether the current event was fired by inertia scroll after fast scroll operations. i.e. user isn't touching the element now, if this is <code>true</code>.</p>
+<p>Indicate whether the current event was fired by inertia scroll after fast scroll operations. i.e. user isn&#39;t touching the element now, if this is <code>true</code>.</p>
 
 <p>Example:</p>
-
-<div class="highlight highlight-js"><pre><span class="nx">element</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'scroll'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'left: '</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">+</span>
-    <span class="s1">', top: '</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">+</span> <span class="s1">', more scrolling: '</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">inertia</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">element</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;scroll&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;left: &#39;</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollLeft</span> <span class="o">+</span>
+    <span class="s1">&#39;, top: &#39;</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">+</span> <span class="s1">&#39;, more scrolling: &#39;</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">inertia</span><span class="p">);</span>
 <span class="p">},</span> <span class="kc">false</span><span class="p">);</span>
-</pre></div>
-
-<h2>
-<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
+</code></pre></div>
+<h2 id="options">Options</h2>
 
 <p>You can tune the behavior of OverflowAndroid via options below.</p>
 
-<h3>
-<a name="overflowandroidenable" class="anchor" href="#overflowandroidenable"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.enable</code>
-</h3>
+<h3 id="overflowandroid.enable"><code>OverflowAndroid.enable</code></h3>
 
 <p>As default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
 <p>Example:</p>
-
-<div class="highlight highlight-js"><pre><span class="c1">// Android only</span>
-<span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">'Android'</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
-</pre></div>
-
-<div class="highlight highlight-js"><pre><span class="c1">// Anytime</span>
+<div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Android only</span>
+<span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="nx">navigator</span><span class="p">.</span><span class="nx">userAgent</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;Android&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
+</code></pre></div><div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Anytime</span>
 <span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
-</pre></div>
-
-<h3>
-<a name="overflowandroidfriction" class="anchor" href="#overflowandroidfriction"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.friction</code>
-</h3>
+</code></pre></div>
+<h3 id="overflowandroid.friction"><code>OverflowAndroid.friction</code></h3>
 
 <p>This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
 
-<h3>
-<a name="overflowandroidtransition" class="anchor" href="#overflowandroidtransition"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.transition</code>
-</h3>
+<h3 id="overflowandroid.transition"><code>OverflowAndroid.transition</code></h3>
 
 <p>If <code>true</code> is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
-<p>The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <strong>Someone, please let me know the way.</strong> (But Firefox for Android can't scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
+<p>The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <em>Someone, please let me know the way.</em> (But Firefox for Android can&#39;t scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
 
-<h3>
-<a name="overflowandroidfps" class="anchor" href="#overflowandroidfps"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.fps</code>
-</h3>
+<h3 id="overflowandroid.fps"><code>OverflowAndroid.fps</code></h3>
 
-<p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. <code>60</code> as default.<br>
-This is ignored when CSS Animations (see <code>OverflowAndroid.transition</code>) is used.</p>
+<p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. <code>60</code> as default.<br>This is ignored when CSS Animations (see <code>OverflowAndroid.transition</code>) is used.</p>
 
-<h3>
-<a name="overflowandroidcursorscrollable" class="anchor" href="#overflowandroidcursorscrollable"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.cursorScrollable</code>
-</h3>
+<h3 id="overflowandroid.cursorscrollable"><code>OverflowAndroid.cursorScrollable</code></h3>
 
-<p>Default: <img src="images/grab.png" alt="grab"></p>
+<p>Default: <img src="img/grab.png" alt="grab"></p>
 
-<p>The CSS <code>cursor</code> value when the target element is not receiving scroll operations.<br>
-If <code>''</code> is specified, <code>cursor</code> is not changed.</p>
+<p>The CSS <code>cursor</code> value when the target element is not receiving scroll operations.<br>If <code>&#39;&#39;</code> is specified, <code>cursor</code> is not changed.</p>
 
-<h3>
-<a name="overflowandroidcursorscrolling" class="anchor" href="#overflowandroidcursorscrolling"><span class="octicon octicon-link"></span></a><code>OverflowAndroid.cursorScrolling</code>
-</h3>
+<h3 id="overflowandroid.cursorscrolling"><code>OverflowAndroid.cursorScrolling</code></h3>
 
-<p>Default: <img src="images/grabbing.png" alt="grabbing"></p>
+<p>Default: <img src="img/grabbing.png" alt="grabbing"></p>
 
-<p>The CSS <code>cursor</code> value when the target element is receiving scroll operations.<br>
-If <code>''</code> is specified, <code>cursor</code> is not changed.</p>
+<p>The CSS <code>cursor</code> value when the target element is receiving scroll operations.<br>If <code>&#39;&#39;</code> is specified, <code>cursor</code> is not changed.</p>
 
-<h2>
-<a name="see-also" class="anchor" href="#see-also"><span class="octicon octicon-link"></span></a>See Also</h2>
+<h2 id="see-also">See Also</h2>
 
 <p><a href="https://github.com/anseki/jquery-overflow-android">jQuery.overflowAndroid</a> is jQuery plugin that is wrapper of OverflowAndroid.</p>
-      </section>
-    </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">OverflowAndroid maintained by <a href="https://github.com/anseki">anseki</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
+    </main>
+    <footer>
+      <p class="copyright">OverflowAndroid maintained by <a href="https://github.com/anseki">anseki</a></p>
+    </footer>
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="js/hammer.min.js"></script>
+  <script src="js/overflow-android.min.js"></script>
+  <script src="js/sample.js"></script>
 
-    
-
-  </body>
+</body>
 </html>
