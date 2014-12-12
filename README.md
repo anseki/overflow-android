@@ -140,20 +140,20 @@ This is strength of slowdown of inertia scroll after fast scroll operations. Thi
 If `true` is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. `false` as default.  
 *NOTE:* This must be done before making an instance.
 
-The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... **Someone, please let me know the way.** (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
+The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... *Someone, please let me know the way.* (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
 
 ### `OverflowAndroid.fps`
 This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. `60` as default.  
 This is ignored when CSS Animations (see `OverflowAndroid.transition`) is used.
 
 ### `OverflowAndroid.cursorScrollable`
-Default: ![grab](grab.png)
+Default: ![grab](img/grab.png)
 
 The CSS `cursor` value when the target element is not receiving scroll operations.  
 If `''` is specified, `cursor` is not changed.
 
 ### `OverflowAndroid.cursorScrolling`
-Default: ![grabbing](grabbing.png)
+Default: ![grabbing](img/grabbing.png)
 
 The CSS `cursor` value when the target element is receiving scroll operations.  
 If `''` is specified, `cursor` is not changed.
