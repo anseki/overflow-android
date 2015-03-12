@@ -50,7 +50,7 @@ And the instance that is returned by constructor has some methods. (see below)
 
 ## Methods
 
-### `scrollLeft`
+### scrollLeft
 
 ```js
 currentLeft = overflowA.scrollLeft([newLeft])
@@ -59,7 +59,7 @@ currentLeft = overflowA.scrollLeft([newLeft])
 Return the number of pixels that the element's content is scrolled to the left. If an argument is given, the element scrolls to specified position and it is returned.  
 This work equals `element.scrollLeft` property.
 
-### `scrollTop`
+### scrollTop
 
 ```js
 currentTop = overflowA.scrollTop([newTop])
@@ -68,7 +68,7 @@ currentTop = overflowA.scrollTop([newTop])
 Return the number of pixels that the element's content is scrolled upward. If an argument is given, the element scrolls to specified position and it is returned.  
 This work equals `element.scrollTop` property.
 
-### `scroll`
+### scroll
 
 ```js
 currentLeftTop = overflowA.scroll([newLeft[, newTop]])
@@ -76,7 +76,7 @@ currentLeftTop = overflowA.scroll([newLeft[, newTop]])
 
 Return the Object that has `left` as the number of pixels that the element's content is scrolled to the left, and `top` as the number of pixels that the element's content is scrolled upward. If arguments are given, the element scrolls to specified position and it is returned.
 
-### `stop`
+### stop
 
 ```js
 self = overflowA.stop()
@@ -84,7 +84,7 @@ self = overflowA.stop()
 
 Stop scroll immediately.
 
-### `initSize`
+### initSize
 
 ```js
 self = overflowA.initSize([newLeft[, newTop]])
@@ -97,7 +97,7 @@ If you changed the size of elements, you must call this method. If arguments are
 
 The `scroll` event is fired when the target element has been scrolled. The `Event` object that is passed to event listeners has an additional property below.
 
-### `inertia`
+### inertia
 
 Type: Boolean
 
@@ -116,7 +116,7 @@ element.addEventListener('scroll', function(e) {
 
 You can tune the behavior of OverflowAndroid via options below.
 
-### `OverflowAndroid.enable`
+### OverflowAndroid.enable
 
 As default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.  
 *NOTE:* This must be done before making an instance.
@@ -133,26 +133,26 @@ OverflowAndroid.enable = navigator.userAgent.indexOf('Android') >= 0;
 OverflowAndroid.enable = true;
 ```
 
-### `OverflowAndroid.friction`
+### OverflowAndroid.friction
 This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. `0.001` as default.
 
-### `OverflowAndroid.transition`
+### OverflowAndroid.transition
 If `true` is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. `false` as default.  
 *NOTE:* This must be done before making an instance.
 
 The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... *Someone, please let me know the way.* (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
 
-### `OverflowAndroid.fps`
+### OverflowAndroid.fps
 This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. `60` as default.  
 This is ignored when CSS Animations (see `OverflowAndroid.transition`) is used.
 
-### `OverflowAndroid.cursorScrollable`
+### OverflowAndroid.cursorScrollable
 Default: ![grab](grab.png)
 
 The CSS `cursor` value when the target element is not receiving scroll operations.  
 If `''` is specified, `cursor` is not changed.
 
-### `OverflowAndroid.cursorScrolling`
+### OverflowAndroid.cursorScrolling
 Default: ![grabbing](grabbing.png)
 
 The CSS `cursor` value when the target element is receiving scroll operations.  
