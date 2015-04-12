@@ -78,27 +78,27 @@
 
 <h2 id="methods">Methods</h2>
 
-<h3 id="scrollleft"><code>scrollLeft</code></h3>
+<h3 id="scrollleft">scrollLeft</h3>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">currentLeft</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollLeft</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">])</span>
 </code></pre></div>
 <p>Return the number of pixels that the element&#39;s content is scrolled to the left. If an argument is given, the element scrolls to specified position and it is returned.<br>This work equals <code>element.scrollLeft</code> property.</p>
 
-<h3 id="scrolltop"><code>scrollTop</code></h3>
+<h3 id="scrolltop">scrollTop</h3>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">currentTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scrollTop</span><span class="p">([</span><span class="nx">newTop</span><span class="p">])</span>
 </code></pre></div>
 <p>Return the number of pixels that the element&#39;s content is scrolled upward. If an argument is given, the element scrolls to specified position and it is returned.<br>This work equals <code>element.scrollTop</code> property.</p>
 
-<h3 id="scroll"><code>scroll</code></h3>
+<h3 id="scroll">scroll</h3>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">currentLeftTop</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">scroll</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
 </code></pre></div>
 <p>Return the Object that has <code>left</code> as the number of pixels that the element&#39;s content is scrolled to the left, and <code>top</code> as the number of pixels that the element&#39;s content is scrolled upward. If arguments are given, the element scrolls to specified position and it is returned.</p>
 
-<h3 id="stop"><code>stop</code></h3>
+<h3 id="stop">stop</h3>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">self</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">stop</span><span class="p">()</span>
 </code></pre></div>
 <p>Stop scroll immediately.</p>
 
-<h3 id="initsize"><code>initSize</code></h3>
+<h3 id="initsize">initSize</h3>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="nx">self</span> <span class="o">=</span> <span class="nx">overflowA</span><span class="p">.</span><span class="nx">initSize</span><span class="p">([</span><span class="nx">newLeft</span><span class="p">[,</span> <span class="nx">newTop</span><span class="p">]])</span>
 </code></pre></div>
 <p>OverflowAndroid computes the size of elements for scroll. It computes again automatically when a window is resized. Therefore you usually don&#39;t need to call this method.<br>If you changed the size of elements, you must call this method. If arguments are given, the size of elements is computed and the element scrolls to specified position.</p>
@@ -107,7 +107,7 @@
 
 <p>The <code>scroll</code> event is fired when the target element has been scrolled. The <code>Event</code> object that is passed to event listeners has an additional property below.</p>
 
-<h3 id="inertia"><code>inertia</code></h3>
+<h3 id="inertia">inertia</h3>
 
 <p>Type: Boolean</p>
 
@@ -123,7 +123,7 @@
 
 <p>You can tune the behavior of OverflowAndroid via options below.</p>
 
-<h3 id="overflowandroid.enable"><code>OverflowAndroid.enable</code></h3>
+<h3 id="overflowandroid.enable">OverflowAndroid.enable</h3>
 
 <p>As default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
@@ -133,27 +133,27 @@
 </code></pre></div><div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Anytime</span>
 <span class="nx">OverflowAndroid</span><span class="p">.</span><span class="nx">enable</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
 </code></pre></div>
-<h3 id="overflowandroid.friction"><code>OverflowAndroid.friction</code></h3>
+<h3 id="overflowandroid.friction">OverflowAndroid.friction</h3>
 
 <p>This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
 
-<h3 id="overflowandroid.transition"><code>OverflowAndroid.transition</code></h3>
+<h3 id="overflowandroid.transition">OverflowAndroid.transition</h3>
 
 <p>If <code>true</code> is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
 <p>The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <em>Someone, please let me know the way.</em> (But Firefox for Android can&#39;t scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
 
-<h3 id="overflowandroid.fps"><code>OverflowAndroid.fps</code></h3>
+<h3 id="overflowandroid.fps">OverflowAndroid.fps</h3>
 
 <p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. <code>60</code> as default.<br>This is ignored when CSS Animations (see <code>OverflowAndroid.transition</code>) is used.</p>
 
-<h3 id="overflowandroid.cursorscrollable"><code>OverflowAndroid.cursorScrollable</code></h3>
+<h3 id="overflowandroid.cursorscrollable">OverflowAndroid.cursorScrollable</h3>
 
 <p>Default: <img src="img/grab.png" alt="grab"></p>
 
 <p>The CSS <code>cursor</code> value when the target element is not receiving scroll operations.<br>If <code>&#39;&#39;</code> is specified, <code>cursor</code> is not changed.</p>
 
-<h3 id="overflowandroid.cursorscrolling"><code>OverflowAndroid.cursorScrolling</code></h3>
+<h3 id="overflowandroid.cursorscrolling">OverflowAndroid.cursorScrolling</h3>
 
 <p>Default: <img src="img/grabbing.png" alt="grabbing"></p>
 
