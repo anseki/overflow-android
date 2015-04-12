@@ -161,31 +161,3 @@ If `''` is specified, `cursor` is not changed.
 ## See Also
 
 [jQuery.overflowAndroid](https://github.com/anseki/jquery-overflow-android) is jQuery plugin that is wrapper of OverflowAndroid.
-
-## History
- * 2014-11-11			v0.7.4			Add changing cursor by size.
- * 2014-10-31			v0.7.2			Fix: native scroll by focusing.
- * 2014-10-09			v0.7.0			Add `stop` method.
- * 2014-10-09			v0.6.2			Change alternative `cursor` value.
- * 2014-10-06			v0.6.1			Fix: inertia scroll is not canceled by another scroll.
- * 2014-10-05			v0.6.0			Add: `cursorScrollable` and `cursorScrolling` options.
- * 2014-10-05			v0.5.0			Support `scroll` event.
- * 2014-09-26			v0.4.10			Fix: `scrollLeft()` and `scrollTop()` of disabled instance fail.
- * 2014-09-23			v0.4.9			`initSize()` accepts position.
- * 2014-09-22			v0.4.8			`initSize()` checks and resets position.
- * 2014-09-22			v0.4.7			Fix: scroll-length to be over a range when window is resized.
- * 2014-09-22			v0.4.6			Fix: `scrollLeft` and `scrollTop` native properties are restored.
- * 2014-09-22			v0.4.5			Fix: `initSize()` of disabled instance fails.
- * 2014-09-21			v0.4.4			Fix: `scrollLeft` and `scrollTop` native properties have value.
- * 2014-09-09			v0.4.3			Fix: `scrollLeft()` and `scrollTop()` do not return value.
- * 2014-09-09			v0.4.2			Rewrite code of CSS animation.
- * 2014-09-09			v0.4.1			Rewrite code of positioning.
- * 2014-09-08			v0.4.0			Add `scroll` method.
- * 2014-09-07			v0.3.1			CSS animation to be disabled as default.
- * 2014-09-06			v0.3.0			Support CSS animation.
- * 2014-09-05			v0.2.2			Adjust fast scroll sensor.
- * 2014-09-05			v0.2.1			Change calculation of velocity.
- * 2014-09-05			v0.2.0			Support CSS `transform`.
- * 2014-09-05			v0.1.2			Change calculation of friction.
- * 2014-08-31			v0.1.1			Change inertia scroll animation.
- * 2014-08-30			v0.1.0			Initial release.
