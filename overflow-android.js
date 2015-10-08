@@ -37,7 +37,7 @@
     nScrollOffset
 */
 
-var OverflowAndroid = (function(undefined) {
+;(function(global, undefined) {
 'use strict';
 
 var
@@ -104,7 +104,7 @@ function OverflowAndroid(target) {
       { elmView.style.position = 'relative'; }
     elmContent.style.position = 'absolute';
   }
-  // window.console.log('Positioning M-mode: ' + (positionTo === _positionTo));
+  // global.console.log('Positioning M-mode: ' + (positionTo === _positionTo));
 
   // check `transition*` for animation is usable
   if (!inertiaScroll) {
@@ -129,7 +129,7 @@ function OverflowAndroid(target) {
     });
     elmContent.style[propTrstProperty] = propTransform;
   }
-  // window.console.log('Animation M-mode: ' + (inertiaScroll === _inertiaScroll));
+  // global.console.log('Animation M-mode: ' + (inertiaScroll === _inertiaScroll));
 
   // for hardware acceleration
   (function() {
@@ -848,5 +848,10 @@ window.addEventListener('resize', function() {
   items.forEach(function(item) { if (item.enable) { item.initSize(); } });
 }, false);
 
-return OverflowAndroid;
-})();
+global.OverflowAndroid = OverflowAndroid;
+
+})(
+/* jshint evil:true, newcap:false */
+Function('return this')()
+/* jshint evil:false, newcap:true */
+);
