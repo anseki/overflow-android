@@ -2,7 +2,7 @@
  * OverflowAndroid
  * https://github.com/anseki/overflow-android
  *
- * Copyright (c) 2014 anseki
+ * Copyright (c) 2015 anseki
  * Licensed under the MIT license.
  */
 
