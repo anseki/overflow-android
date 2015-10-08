@@ -1,6 +1,6 @@
 {
   "name": "overflowandroid",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.",
   "keywords": [
     "inertia",
