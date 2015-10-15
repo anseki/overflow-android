@@ -6,7 +6,6 @@
  * Licensed under the MIT license.
  */
 
-/* exported OverflowAndroid */
 /* global Hammer:false */
 
 /*

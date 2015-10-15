@@ -9,7 +9,7 @@ Android browser has problems as below:
 - `overflow:scroll` and `overflow:auto` don't work on Android 2.x. The elements don't accept scroll operations (swipe, flick, drag, etc.).
 - `element.scrollLeft` and `element.scrollTop` don't work on Android 4.0.x. The elements can't scroll via JavaScript. Strange to say, the element that is set `overflow:hidden` can scroll. But of course that element doesn't accept scroll operations.
 
-OverflowAndroid solves above problems both.
+OverflowAndroid solves problems above.
 
 **See <a href="http://anseki.github.io/overflow-android">DEMO</a>**
 
