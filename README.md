@@ -118,7 +118,7 @@ You can tune the behavior of OverflowAndroid via options below.
 
 ### OverflowAndroid.enable
 
-As default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.  
+By default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.  
 *NOTE:* This must be done before making an instance.
 
 Example:
@@ -134,16 +134,16 @@ OverflowAndroid.enable = true;
 ```
 
 ### OverflowAndroid.friction
-This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. `0.001` as default.
+This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. The default is `0.001`.
 
 ### OverflowAndroid.transition
-If `true` is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. `false` as default.  
+If `true` is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. The default is `false`.  
 *NOTE:* This must be done before making an instance.
 
 The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... *Someone, please let me know the way.* (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
 
 ### OverflowAndroid.fps
-This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. `60` as default.  
+This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. The default is `60`.  
 This is ignored when CSS Animations (see `OverflowAndroid.transition`) is used.
 
 ### OverflowAndroid.cursorScrollable
