@@ -53,7 +53,7 @@
 <li><code>element.scrollLeft</code> and <code>element.scrollTop</code> don&#39;t work on Android 4.0.x. The elements can&#39;t scroll via JavaScript. Strange to say, the element that is set <code>overflow:hidden</code> can scroll. But of course that element doesn&#39;t accept scroll operations.</li>
 </ul>
 
-<p>OverflowAndroid solves above problems both.</p>
+<p>OverflowAndroid solves problems above.</p>
 
 <h2 id="usage">Usage</h2>
 
@@ -125,7 +125,7 @@
 
 <h3 id="overflowandroid.enable">OverflowAndroid.enable</h3>
 
-<p>As default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.<br><em>NOTE:</em> This must be done before making an instance.</p>
+<p>By default, OverflowAndroid works only touch-device. You can control the working or not via specifying a boolean to this option.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
 <p>Example:</p>
 <div class="highlight"><pre><code class="language-js" data-lang="js"><span class="c1">// Android only</span>
@@ -135,17 +135,17 @@
 </code></pre></div>
 <h3 id="overflowandroid.friction">OverflowAndroid.friction</h3>
 
-<p>This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. <code>0.001</code> as default.</p>
+<p>This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. The default is <code>0.001</code>.</p>
 
 <h3 id="overflowandroid.transition">OverflowAndroid.transition</h3>
 
-<p>If <code>true</code> is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. <code>false</code> as default.<br><em>NOTE:</em> This must be done before making an instance.</p>
+<p>If <code>true</code> is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. The default is <code>false</code>.<br><em>NOTE:</em> This must be done before making an instance.</p>
 
 <p>The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <em>Someone, please let me know the way.</em> (But Firefox for Android can&#39;t scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
 
 <h3 id="overflowandroid.fps">OverflowAndroid.fps</h3>
 
-<p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. <code>60</code> as default.<br>This is ignored when CSS Animations (see <code>OverflowAndroid.transition</code>) is used.</p>
+<p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. The default is <code>60</code>.<br>This is ignored when CSS Animations (see <code>OverflowAndroid.transition</code>) is used.</p>
 
 <h3 id="overflowandroid.cursorscrollable">OverflowAndroid.cursorScrollable</h3>
 
