@@ -11,7 +11,7 @@ Android browser has problems as below:
 
 OverflowAndroid solves problems above.
 
-**See <a href="http://anseki.github.io/overflow-android">DEMO</a>**
+**See <a href="http://anseki.github.io/overflow-android/">DEMO</a>**
 
 ## Usage
 [Hammer.js](http://hammerjs.github.io/) is required.
