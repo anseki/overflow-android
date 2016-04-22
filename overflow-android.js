@@ -53,7 +53,6 @@
     propTransform, propTrstProperty, propTrstDuration, propTrstTFunction,
     getStyleProp, setStyleValue, undoNativeScroll; // util methods
 
-
   // http://en.wikipedia.org/wiki/Cubic_function
   function getIntersections(p0, p1, p2, p3, a0, a1) {
     var bx, by,
@@ -178,9 +177,6 @@
       if (styles.hasOwnProperty(prop)) { style[prop] = styles[prop]; }
     }
   }
-
-
-
 
   function _scroll(that, left, top, force, inertia) {
     var scrollValue = that.scrollValue,
@@ -410,12 +406,6 @@
       1000 / OverflowAndroid.fps);
   }
 
-
-
-
-
-
-
   function setCursor(that, scrolling) {
     if (OverflowAndroid.cursorScrollable) {
       that.elmView.style.cursor =
@@ -447,21 +437,24 @@
     });
 
     rePrefixesProp = new RegExp('^(?:' + PREFIXES.join('|') + ')(.)', 'i');
-    function removePrefixesProp(prop) {
+    function normalizeProp(prop) {
       var reUc = /[A-Z]/;
-      return prop.replace(rePrefixesProp, function(str, p1) {
+      // 'ms' and 'Ms' are found by rePrefixesProp. 'i' option
+      return (prop = prop.replace(/-([\da-z])/gi, function(str, p1) { // camelCase
+        return p1.toUpperCase();
+      }).replace(rePrefixesProp, function(str, p1) {
         return reUc.test(p1) ? p1.toLowerCase() : str;
-      });
+      })).toLowerCase() === 'float' ? 'cssFloat' : prop; // for old CSSOM
     }
 
     rePrefixesValue = new RegExp('^(?:' + PREFIXES_VALUE.join('|') + ')', 'i');
-    function removePrefixesValue(value) {
+    function normalizeValue(value) {
       return value.replace(rePrefixesValue, '');
     }
 
     getStyleProp = function(prop, elm) {
       var style, ucfProp;
-      prop = removePrefixesProp(prop);
+      prop = normalizeProp(prop);
       if (props[prop] === undefined) {
         style = elm.style;
 
@@ -494,9 +487,10 @@
         return style[prop] === value;
       }
 
+      if (!(prop = getStyleProp(prop, elm))) { return ''; } // Invalid Property
       values[prop] = values[prop] || {};
       if (!valueArray.some(function(value) {
-        value = removePrefixesValue(value);
+        value = normalizeValue(value);
         if (values[prop][value] === undefined) {
 
           if (trySet(prop, value)) { // original
