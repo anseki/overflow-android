@@ -16,6 +16,10 @@
     positionMin     : {left: N, top: N} range of elmContent position
     positionMax     : {left: N, top: N} range of elmContent position
     positionOffset  : {left: N, top: N} margin of elmContent
+    clientWidth     : width of view area (padding-box of outer element)
+    clientHeight    : height of view area (padding-box of outer element)
+    scrollWidth     : width of scroll content (border-box + margin of inner element + padding of outer element)
+    scrollHeight    : height of scroll content (border-box + margin of inner element + padding of outer element)
     inertia         : {
                         isScrolling: B,
                         keyframes: [styles],
@@ -807,12 +811,19 @@
       viewWidth, viewHeight, viewStyle, contentWidth, contentHeight, contentStyle;
     if (!this.enable) { return this; }
 
-    viewWidth = elmView.clientWidth;
-    viewHeight = elmView.clientHeight;
+    viewWidth = this.clientWidth = elmView.clientWidth;
+    viewHeight = this.clientHeight = elmView.clientHeight;
     viewStyle = window.getComputedStyle(elmView, '');
     contentWidth = elmContent.offsetWidth;
     contentHeight = elmContent.offsetHeight;
     contentStyle = window.getComputedStyle(elmContent, '');
+
+    this.scrollWidth = contentWidth +
+      parseFloat(contentStyle.marginLeft) + parseFloat(contentStyle.marginRight) +
+      parseFloat(viewStyle.paddingLeft) + parseFloat(viewStyle.paddingRight);
+    this.scrollHeight = contentHeight +
+      parseFloat(contentStyle.marginTop) + parseFloat(contentStyle.marginBottom) +
+      parseFloat(viewStyle.paddingTop) + parseFloat(viewStyle.paddingBottom);
 
     this.positionMin.left = viewWidth - contentWidth -
       parseFloat(viewStyle.paddingRight) - parseFloat(contentStyle.marginRight);
