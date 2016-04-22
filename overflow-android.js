@@ -421,7 +421,7 @@
     }
   }
 
-  // getStyleProp, setStyleValue
+  // cssPrefix https://github.com/anseki/css-prefix
   (function() {
     var PREFIXES = ['webkit', 'ms', 'moz', 'o'],
       PREFIXES_PROP = [], PREFIXES_VALUE = [],
