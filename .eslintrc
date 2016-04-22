@@ -1,0 +1,10 @@
+{
+  "extends": "../../_common/eslintrc.json",
+  "env": {"browser": true},
+  "globals": {
+    "Hammer": false
+  },
+  "rules": {
+    "no-underscore-dangle": [2, {"allow": ["_scroll", "_positionTo", "_positionToLegacy", "_inertiaScroll", "_inertiaScrollStop", "_inertiaScrollLegacy", "_inertiaScrollStopLegacy", "_inertiaScrollLegacyInterval", "_getGSetter", "__lookupGetter__", "__lookupSetter__"]}]
+  }
+}
