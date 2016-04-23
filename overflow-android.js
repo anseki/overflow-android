@@ -49,17 +49,17 @@
     P2 = {x: 0.4, y: 1}, P_START = {x: 0, y: 0}, P_END = {x: 1, y: 1}, // bezier points
     DIRECTIONS = [{xy: 'x', lt: 'left'}, {xy: 'y', lt: 'top'}], // for loops
 
-    SCROLL_BAR_MARGIN = 3,
+    SCROLL_BAR_MARGIN = 2,
     DEFAULT_SCROLL_BAR_WIDTH = 5,
     DEFAULT_SCROLL_BAR_COLOR = 'rgba(0,0,0,0.5)',
-    SCROLL_BAR_SHOW_DURATION = 1000,
+    SCROLL_BAR_SHOW_DURATION = 200,
 
     OverflowAndroid,
     items = [],
     // switched methods
     positionTo, inertiaScroll, inertiaScrollStop,
     // CSS properties
-    propTransform, propTrstProperty, propTrstDuration, propTrstTFunction,
+    propTransform, propTrstProperty, propTrstDuration, propTrstTFunction, propOpacity,
     animInitStyles, getStyleProp, setStyleValue, undoNativeScroll; // util methods
 
   // http://en.wikipedia.org/wiki/Cubic_function
@@ -224,6 +224,7 @@
       scrollValue.left = newValue.left;
       scrollValue.top = newValue.top;
       positionTo(that, scrollValue);
+      if (OverflowAndroid.scrollBar) { that.scrollBars.update(); }
       if (update) { scrollEvent(that.elmView, that.inertia.isScrolling); } // fire event
     }
     return scrollValue;
@@ -262,6 +263,8 @@
       keyframes = {}, moveRs = [], // {N<moveR>: {S<axis>: N<scrollValue>}}
       timeLenAll, moveLenAll = {}, fixValue = {}, timeRLeft = 0,
       bezierRight = {p0: P_START, p1: P_START, p2: P2, p3: P_END};
+
+    if (OverflowAndroid.scrollBar) { that.scrollBars.hide(true); }
 
     inertia.keyframes = [];
     if (!inertia.x.velocity && !inertia.y.velocity) { return; }
@@ -372,6 +375,11 @@
           styles[propTransform] =
             'translate3d(' + position.left + 'px, ' + position.top + 'px, 0)';
           setStyles(elmContent, styles);
+
+          if (OverflowAndroid.scrollBar) {
+            that.scrollBars.update();
+            that.scrollBars.hide(false);
+          }
         }
       }
     }
@@ -663,21 +671,28 @@
       direction       : direction 'v' or 'h'
       elmBar          : Container element
       elmHandle       : Handle element
+      value           : bar-moving-length (px)
       maxValue        : 0 or range
+      valueRate       : {left: N, top: N} bar-moving-length = OverflowAndroid#scrollValue * valueRate
   */
   function ScrollBar(overflowA, direction) {
-    var stylesBar, stylesHandle, propTrstProperty, propOpacity;
+    var stylesBar, stylesHandle;
 
     this.overflowA = overflowA;
     this.direction = direction;
     this.elmBar = animInit(document.createElement('div'));
     this.elmHandle = animInit(document.createElement('div'));
+    this.value = 0;
     this.maxValue = 0;
+    this.valueRate = {};
 
-    if (!(propTrstProperty = getStyleProp('transitionProperty', this.elmBar)) ||
-        !(propOpacity = getStyleProp('opacity', this.elmBar))) {
+    if (!propTrstProperty && !(propTrstProperty = getStyleProp('transitionProperty', this.elmBar)) ||
+        !propOpacity && !(propOpacity = getStyleProp('opacity', this.elmBar))) {
       throw new Error('Not supported');
     }
+    if (!propTransform) { propTransform = getStyleProp('transform', this.elmHandle); }
+    if (!propTrstDuration) { propTrstDuration = getStyleProp('transitionDuration', this.elmBar); }
+    if (!propTrstTFunction) { propTrstTFunction = getStyleProp('transitionTimingFunction', this.elmBar); }
 
     stylesBar = {
       display: 'none',
@@ -685,8 +700,8 @@
     };
     stylesBar[propOpacity] = '0';
     stylesBar[propTrstProperty] = propOpacity;
-    stylesBar[getStyleProp('transitionDuration', this.elmBar)] = SCROLL_BAR_SHOW_DURATION + 'ms';
-    stylesBar[getStyleProp('transitionTimingFunction', this.elmBar)] = 'linear';
+    stylesBar[propTrstDuration] = SCROLL_BAR_SHOW_DURATION + 'ms';
+    stylesBar[propTrstTFunction] = 'linear';
 
     stylesHandle = {backgroundColor: OverflowAndroid.scrollBarColor};
     stylesHandle[getStyleProp('borderRadius', this.elmHandle)] =
@@ -709,27 +724,44 @@
   }
 
   ScrollBar.prototype.initSize = function() {
-    var sizeBar, sizeHandle, prop;
-
-    function disable(that) {
-      that.maxValue = 0;
-      that.elmBar.style.display = 'none';
-      return that;
-    }
-
+    var overflowA = this.overflowA, sizeBar, sizeHandle, prop, propCC, scrDir;
+    // Add margin for another bar at bottom/right of bars.
     if (this.direction === 'v') {
-      if (!this.overflowA.scrollMax.top) { return disable(this); }
-      sizeBar = this.overflowA.clientHeight - SCROLL_BAR_MARGIN * 2;
-      sizeHandle = 30;
       prop = 'height';
+      propCC = 'Height';
+      scrDir = 'top';
     } else { // 'h'
-      if (!this.overflowA.scrollMax.left) { return disable(this); }
-      sizeBar = this.overflowA.clientWidth - SCROLL_BAR_MARGIN * 2;
-      sizeHandle = 30;
       prop = 'width';
+      propCC = 'Width';
+      scrDir = 'left';
     }
+
+    if (!overflowA.scrollMax[scrDir]) {
+      this.maxValue = 0;
+      this.elmBar.style.display = 'none';
+      return this;
+    }
+    sizeBar = overflowA['client' + propCC] - SCROLL_BAR_MARGIN * 2 - OverflowAndroid.scrollBarWidth;
+    sizeHandle = overflowA['client' + propCC] * (sizeBar / overflowA['scroll' + propCC]);
+    if (sizeHandle < OverflowAndroid.scrollBarWidth) { sizeHandle = OverflowAndroid.scrollBarWidth; }
+    this.maxValue = sizeBar - sizeHandle;
+    this.valueRate[scrDir] = this.maxValue / overflowA.scrollMax[scrDir];
+
     this.elmBar.style[prop] = sizeBar + 'px';
     this.elmHandle.style[prop] = sizeHandle + 'px';
+    return this;
+  };
+
+  ScrollBar.prototype.update = function() {
+    var overflowA = this.overflowA,
+      scrDir = this.direction === 'v' ? 'top' : 'left', newValue;
+    newValue = overflowA.scrollValue[scrDir] * this.valueRate[scrDir];
+    if (newValue > this.maxValue) { newValue = this.maxValue; }
+    if (newValue !== this.value) {
+      this.elmHandle.style[propTransform] = this.direction === 'v' ?
+        'translate3d(0, ' + newValue + 'px, 0)' : 'translate3d(' + newValue + 'px, 0, 0)';
+      this.value = newValue;
+    }
     return this;
   };
 
@@ -738,16 +770,86 @@
     PROPERTIES
       v               : <ScrollBar>
       h               : <ScrollBar>
+      shown           : switched visibility that is requested state
+      hidden          : switched forcedly visibility
+      timer
   */
   function ScrollBars(overflowA) {
-    this.v = new ScrollBar(overflowA, 'v');
-    this.h = new ScrollBar(overflowA, 'h');
+    try {
+      this.v = new ScrollBar(overflowA, 'v');
+      this.h = new ScrollBar(overflowA, 'h');
+      this.shown = false;
+      this.hidden = false;
+    } catch (error) {
+      global.console.error(error);
+    }
   }
 
   ScrollBars.prototype.initSize = function() {
-    this.v.initSize();
-    this.h.initSize();
+    if (this.v) {
+      this.v.initSize();
+      this.h.initSize();
+    }
     return this;
+  };
+
+  ScrollBars.prototype.update = function() {
+    if (this.v) {
+      this.v.update();
+      this.h.update();
+    }
+    return this;
+  };
+
+  ScrollBars.prototype.show = function(show) {
+    var that = this;
+    if (that.v && show !== that.shown) {
+
+      if (!that.hidden) {
+        window.clearTimeout(that.timer);
+        if (show) {
+          that.v.elmBar.style.display = that.h.elmBar.style.display = 'block'; // before opacity
+          window.setTimeout(function() {
+            that.v.elmBar.style[propOpacity] = that.h.elmBar.style[propOpacity] = '1';
+          }, 0);
+        } else {
+          that.v.elmBar.style[propOpacity] = that.h.elmBar.style[propOpacity] = '0';
+          that.timer = window.setTimeout(function() {
+            that.v.elmBar.style.display = that.h.elmBar.style.display = 'none';
+          }, SCROLL_BAR_SHOW_DURATION);
+        }
+      }
+
+      that.shown = show;
+    }
+    return that;
+  };
+
+  ScrollBars.prototype.hide = function(hide) {
+    var that = this;
+    if (that.v && hide !== that.hidden) {
+      window.clearTimeout(that.timer);
+      if (hide) {
+        that.v.elmBar.style.display = that.h.elmBar.style.display = 'none';
+      } else {
+        // switch immediately (reflow and re-change opacity for bug of FF)
+        [that.v.elmBar, that.h.elmBar].forEach(function(elmBar) {
+          elmBar.style[propTrstProperty] = 'none';
+          elmBar.offsetWidth; /* force reflow */ // eslint-disable-line no-unused-expressions
+          elmBar.style.display = 'block';
+          elmBar.style[propOpacity] = that.shown ? '0' : '1';
+        });
+        window.setTimeout(function() {
+          [that.v.elmBar, that.h.elmBar].forEach(function(elmBar) {
+            elmBar.style[propOpacity] = that.shown ? '1' : '0';
+            elmBar.offsetWidth; /* force reflow */ // eslint-disable-line no-unused-expressions
+            elmBar.style[propTrstProperty] = propOpacity;
+          });
+        }, 0);
+      }
+      that.hidden = hide;
+    }
+    return that;
   };
 
   OverflowAndroid = function OverflowAndroid(target) {
@@ -835,7 +937,7 @@
     if (!undoNativeScroll) { undoNativeScroll = getUndoNativeScroll(elmView); }
     elmView.addEventListener('scroll', function(e) {
       if (e.inertia === undefined) { undoNativeScroll(that); } // undo native scroll
-    });
+    }, false);
 
     Object.defineProperty(elmView, 'scrollLeft', {
       get: function() { return that.scrollLeft(); },
@@ -853,7 +955,12 @@
 
     // scroll-bar
     if (OverflowAndroid.scrollBar) {
+      if (window.getComputedStyle(elmView, '').position === 'static') {
+        elmView.style.position = 'relative';
+      }
       that.scrollBars = new ScrollBars(that);
+      elmView.addEventListener('mouseenter', function() { that.scrollBars.show(true); }, false);
+      elmView.addEventListener('mouseleave', function() { that.scrollBars.show(false); }, false);
     }
 
     // Events
@@ -964,13 +1071,11 @@
     }
     this.scrollMax.top = this.positionMax.top - this.positionMin.top;
 
+    if (OverflowAndroid.scrollBar) { this.scrollBars.initSize(); }
+
     undoNativeScroll(this);
     _scroll(this, left, top, true);
     setCursor(this);
-
-    if (OverflowAndroid.scrollBar) {
-      this.scrollBars.initSize();
-    }
 
     return this;
   };
