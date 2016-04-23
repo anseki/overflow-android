@@ -8,9 +8,8 @@
 
 /*
   PROPERTIES
-
-    elmView         : outer element
-    elmContent      : inner element
+    elmView         : Container element
+    elmContent      : Element that includes contents
     scrollValue     : {left: N, top: N} current scroll value
     scrollMax       : {left: N, top: N} range scroll value
     positionMin     : {left: N, top: N} range of elmContent position
@@ -33,8 +32,9 @@
                         y: SAME
                       }
     hammer          : Hammer.Manager
+    scrollBars      : <ScrollBars>{v: <ScrollBar>, h: <ScrollBar>}
     enable
-    nScrollElmAnc      : for browsers (Chrome) unsupport G(S)etter method
+    nScrollElmAnc   : for browsers (Chrome) unsupport G(S)etter method
     nScrollOffset
 */
 
@@ -49,13 +49,18 @@
     P2 = {x: 0.4, y: 1}, P_START = {x: 0, y: 0}, P_END = {x: 1, y: 1}, // bezier points
     DIRECTIONS = [{xy: 'x', lt: 'left'}, {xy: 'y', lt: 'top'}], // for loops
 
+    SCROLL_BAR_MARGIN = 3,
+    DEFAULT_SCROLL_BAR_WIDTH = 5,
+    DEFAULT_SCROLL_BAR_COLOR = 'rgba(0,0,0,0.5)',
+    SCROLL_BAR_SHOW_DURATION = 1000,
+
     OverflowAndroid,
     items = [],
     // switched methods
     positionTo, inertiaScroll, inertiaScrollStop,
     // CSS properties
     propTransform, propTrstProperty, propTrstDuration, propTrstTFunction,
-    getStyleProp, setStyleValue, undoNativeScroll; // util methods
+    animInitStyles, getStyleProp, setStyleValue, undoNativeScroll; // util methods
 
   // http://en.wikipedia.org/wiki/Cubic_function
   function getIntersections(p0, p1, p2, p3, a0, a1) {
@@ -180,6 +185,20 @@
     for (prop in styles) {
       if (styles.hasOwnProperty(prop)) { style[prop] = styles[prop]; }
     }
+    return elm;
+  }
+
+  function animInit(elm) {
+    if (!animInitStyles) {
+      animInitStyles = {};
+      // for hardware acceleration
+      animInitStyles[getStyleProp('transform', elm)] = 'translateZ(0)';
+      animInitStyles[getStyleProp('perspective', elm)] = '1000px';
+      animInitStyles[getStyleProp('backfaceVisibility', elm)] = 'hidden';
+      animInitStyles[getStyleProp('tapHighlightColor', elm)] = 'rgba(0, 0, 0, 0)';
+      animInitStyles[getStyleProp('boxShadow', elm)] = '0 0 1px rgba(0, 0, 0, 0)';
+    }
+    return setStyles(elm, animInitStyles);
   }
 
   function _scroll(that, left, top, force, inertia) {
@@ -637,6 +656,100 @@
       };
   }
 
+  // ================ ScrollBar
+  /*
+    PROPERTIES
+      overflowA       : <OverflowAndroid>
+      direction       : direction 'v' or 'h'
+      elmBar          : Container element
+      elmHandle       : Handle element
+      maxValue        : 0 or range
+  */
+  function ScrollBar(overflowA, direction) {
+    var stylesBar, stylesHandle, propTrstProperty, propOpacity;
+
+    this.overflowA = overflowA;
+    this.direction = direction;
+    this.elmBar = animInit(document.createElement('div'));
+    this.elmHandle = animInit(document.createElement('div'));
+    this.maxValue = 0;
+
+    if (!(propTrstProperty = getStyleProp('transitionProperty', this.elmBar)) ||
+        !(propOpacity = getStyleProp('opacity', this.elmBar))) {
+      throw new Error('Not supported');
+    }
+
+    stylesBar = {
+      display: 'none',
+      position: 'absolute'
+    };
+    stylesBar[propOpacity] = '0';
+    stylesBar[propTrstProperty] = propOpacity;
+    stylesBar[getStyleProp('transitionDuration', this.elmBar)] = SCROLL_BAR_SHOW_DURATION + 'ms';
+    stylesBar[getStyleProp('transitionTimingFunction', this.elmBar)] = 'linear';
+
+    stylesHandle = {backgroundColor: OverflowAndroid.scrollBarColor};
+    stylesHandle[getStyleProp('borderRadius', this.elmHandle)] =
+      (OverflowAndroid.scrollBarWidth / 2) + 'px';
+
+    if (direction === 'v') {
+      stylesBar.width = OverflowAndroid.scrollBarWidth + 'px';
+      stylesBar.right = SCROLL_BAR_MARGIN + 'px';
+      stylesBar.top = SCROLL_BAR_MARGIN + 'px';
+      stylesHandle.width = '100%';
+    } else { // 'h'
+      stylesBar.height = OverflowAndroid.scrollBarWidth + 'px';
+      stylesBar.left = SCROLL_BAR_MARGIN + 'px';
+      stylesBar.bottom = SCROLL_BAR_MARGIN + 'px';
+      stylesHandle.height = '100%';
+    }
+
+    setStyles(overflowA.elmView.appendChild(this.elmBar), stylesBar)
+      .appendChild(setStyles(this.elmHandle, stylesHandle));
+  }
+
+  ScrollBar.prototype.initSize = function() {
+    var sizeBar, sizeHandle, prop;
+
+    function disable(that) {
+      that.maxValue = 0;
+      that.elmBar.style.display = 'none';
+      return that;
+    }
+
+    if (this.direction === 'v') {
+      if (!this.overflowA.scrollMax.top) { return disable(this); }
+      sizeBar = this.overflowA.clientHeight - SCROLL_BAR_MARGIN * 2;
+      sizeHandle = 30;
+      prop = 'height';
+    } else { // 'h'
+      if (!this.overflowA.scrollMax.left) { return disable(this); }
+      sizeBar = this.overflowA.clientWidth - SCROLL_BAR_MARGIN * 2;
+      sizeHandle = 30;
+      prop = 'width';
+    }
+    this.elmBar.style[prop] = sizeBar + 'px';
+    this.elmHandle.style[prop] = sizeHandle + 'px';
+    return this;
+  };
+
+  // ================ ScrollBars
+  /*
+    PROPERTIES
+      v               : <ScrollBar>
+      h               : <ScrollBar>
+  */
+  function ScrollBars(overflowA) {
+    this.v = new ScrollBar(overflowA, 'v');
+    this.h = new ScrollBar(overflowA, 'h');
+  }
+
+  ScrollBars.prototype.initSize = function() {
+    this.v.initSize();
+    this.h.initSize();
+    return this;
+  };
+
   OverflowAndroid = function OverflowAndroid(target) {
     var that = this, elmView, elmContent, startPoint, startScroll, panmoveTime;
 
@@ -715,16 +828,8 @@
     }
     // global.console.log('Animation M-mode: ' + (inertiaScroll === _inertiaScroll));
 
-    // for hardware acceleration
-    (function() {
-      var styles = {};
-      styles[getStyleProp('transform', elmView)] = 'translateZ(0)';
-      styles[getStyleProp('perspective', elmView)] = '1000';
-      styles[getStyleProp('backfaceVisibility', elmView)] = 'hidden';
-      styles[getStyleProp('tapHighlightColor', elmView)] = 'rgba(0, 0, 0, 0)';
-      styles[getStyleProp('boxShadow', elmView)] = '0 0 1px rgba(0, 0, 0, 0)';
-      [elmView, elmContent].forEach(function(elm) { setStyles(elm, styles); });
-    })();
+    animInit(elmView);
+    animInit(elmContent);
 
     // Native getter/setter methods scrollLeft/scrollTop
     if (!undoNativeScroll) { undoNativeScroll = getUndoNativeScroll(elmView); }
@@ -745,7 +850,11 @@
       .forEach(function(prop) { that[prop] = {}; });
     that.scrollValue = {left: 0, top: 0};
     that.enable = true;
-    items.push(that.initSize());
+
+    // scroll-bar
+    if (OverflowAndroid.scrollBar) {
+      that.scrollBars = new ScrollBars(that);
+    }
 
     // Events
     that.hammer = new Hammer.Manager(elmView, {
@@ -804,6 +913,8 @@
     })/*
     .on('swipe', function(e) {
     })*/;
+
+    items.push(that.initSize());
   };
 
   OverflowAndroid.prototype.initSize = function(left, top) {
@@ -857,6 +968,10 @@
     _scroll(this, left, top, true);
     setCursor(this);
 
+    if (OverflowAndroid.scrollBar) {
+      this.scrollBars.initSize();
+    }
+
     return this;
   };
 
@@ -874,6 +989,10 @@
   OverflowAndroid.friction = DEFAULT_FRICTION;
   OverflowAndroid.transition = DEFAULT_TRANSITION;
   OverflowAndroid.fps = DEFAULT_FPS;
+
+  OverflowAndroid.scrollBar = true;
+  OverflowAndroid.scrollBarWidth = DEFAULT_SCROLL_BAR_WIDTH;
+  OverflowAndroid.scrollBarColor = DEFAULT_SCROLL_BAR_COLOR;
 
   window.addEventListener('resize', function() {
     if (!OverflowAndroid.enable) { return; }
