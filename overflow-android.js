@@ -46,6 +46,7 @@
     DEFAULT_TRANSITION = false,
     DEFAULT_FPS = 60, // for legacy
     PANSTOP_INTERVAL = 100, // ms
+    IS_TOUCH_DEVICE = 'ontouchstart' in window,
     P2 = {x: 0.4, y: 1}, P_START = {x: 0, y: 0}, P_END = {x: 1, y: 1}, // bezier points
     DIRECTIONS = [{xy: 'x', lt: 'left'}, {xy: 'y', lt: 'top'}], // for loops
 
@@ -426,7 +427,10 @@
     });
     inertia.intervalTime = now;
 
-    if (inertia.x.velocity === 0 && inertia.y.velocity === 0) { _inertiaScrollStopLegacy(that); }
+    if (inertia.x.velocity === 0 && inertia.y.velocity === 0) {
+      _inertiaScrollStopLegacy(that);
+      if (OverflowAndroid.scrollBar && IS_TOUCH_DEVICE) { that.scrollBars.show(false); }
+    }
   }
 
   function _inertiaScrollLegacy(that) {
@@ -979,6 +983,7 @@
       startPoint = {x: pointer.clientX, y: pointer.clientY};
       startScroll = {left: that.scrollValue.left, top: that.scrollValue.top};
       setCursor(that, true);
+      if (OverflowAndroid.scrollBar && IS_TOUCH_DEVICE) { that.scrollBars.show(true); }
 
       e.preventDefault();
     })
@@ -1090,7 +1095,7 @@
     return this;
   };
 
-  OverflowAndroid.enable = ('ontouchstart' in window)/* && (navigator.userAgent.indexOf('Firefox') < 0)*/;
+  OverflowAndroid.enable = IS_TOUCH_DEVICE/* && (navigator.userAgent.indexOf('Firefox') < 0)*/;
   OverflowAndroid.friction = DEFAULT_FRICTION;
   OverflowAndroid.transition = DEFAULT_TRANSITION;
   OverflowAndroid.fps = DEFAULT_FPS;
