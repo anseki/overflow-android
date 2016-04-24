@@ -192,7 +192,8 @@ If `''` is specified, `cursor` is not changed.
 
 Default: `true`
 
-Show scroll bars.
+Show scroll bars.  
+Now, this scroll bars are mere **indicators** that only show each scroll-position, user can **not** scroll the element by operating these scroll bars.
 
 ### `OverflowAndroid.scrollBarWidth`
 
