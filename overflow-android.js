@@ -884,6 +884,14 @@
       elmView.scrollLeft = elmView.scrollTop = 0; // set again
     })();
 
+    // FF, IE pick drag-event of some elements such as img, a, etc.
+    elmContent.addEventListener('dragstart', function(e) { e.preventDefault(); }, false);
+    // `user-select` is not inherited in some browsers.
+    (function() {
+      var propUserSelect = getStyleProp('userSelect', elmContent);
+      if (propUserSelect) { elmContent.style[propUserSelect] = 'none'; }
+    })();
+
     if (OverflowAndroid.cursorScrollable === undefined) {
       OverflowAndroid.cursorScrollable =
         setStyleValue(elmView, 'cursor', ['grab', 'all-scroll']);
