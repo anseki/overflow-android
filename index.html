@@ -149,17 +149,15 @@
 </code></pre></div>
 <h3 id="overflowandroid.friction"><code>OverflowAndroid.friction</code></h3>
 
-<p>This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. The default is <code>0.001</code>.</p>
+<p>Default: <code>0.001</code></p>
 
-<h3 id="overflowandroid.transition"><code>OverflowAndroid.transition</code></h3>
-
-<p>If <code>true</code> is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. The default is <code>false</code>.<br><em>NOTE:</em> This must be done before making an instance.</p>
-
-<p>The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <em>Someone, please let me know the way.</em> (But Firefox for Android can&#39;t scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
+<p>This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second.</p>
 
 <h3 id="overflowandroid.fps"><code>OverflowAndroid.fps</code></h3>
 
-<p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. The default is <code>60</code>.<br>This is ignored when CSS Animations is used (see <a href="#overflowandroidtransition"><code>OverflowAndroid.transition</code></a>).</p>
+<p>Default: <code>60</code></p>
+
+<p>This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second.<br>This is ignored when CSS Animations is used (see <a href="#overflowandroidtransition"><code>OverflowAndroid.transition</code></a>).</p>
 
 <h3 id="overflowandroid.cursorscrollable"><code>OverflowAndroid.cursorScrollable</code></h3>
 
@@ -172,6 +170,30 @@
 <p>Default: <img src="img/grabbing.png" alt="grabbing"></p>
 
 <p>The CSS <code>cursor</code> value when the target element is receiving scroll operations.<br>If <code>&#39;&#39;</code> is specified, <code>cursor</code> is not changed.</p>
+
+<h3 id="overflowandroid.scrollbar"><code>OverflowAndroid.scrollBar</code></h3>
+
+<p>Default: <code>true</code></p>
+
+<p>Show scroll bars.</p>
+
+<h3 id="overflowandroid.scrollbarwidth"><code>OverflowAndroid.scrollBarWidth</code></h3>
+
+<p>Default: <code>5</code></p>
+
+<p>Size of scroll bars. This is a number of pixels.</p>
+
+<h3 id="overflowandroid.scrollbarcolor"><code>OverflowAndroid.scrollBarColor</code></h3>
+
+<p>Default: <code>&#39;rgba(0,0,0,0.5)&#39;</code></p>
+
+<p>Color of scroll bars.</p>
+
+<h3 id="overflowandroid.transition"><code>OverflowAndroid.transition</code></h3>
+
+<p>If <code>true</code> is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. The default is <code>false</code>.<br><em>NOTE:</em> This must be done before making an instance.</p>
+
+<p>The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... <em>Someone, please let me know the way.</em> (But Firefox for Android can&#39;t scroll smoothly normal <code>overflow:scroll</code> in the first place.)</p>
 
 <h2 id="see-also">See Also</h2>
 
