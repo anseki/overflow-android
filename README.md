@@ -14,6 +14,7 @@ OverflowAndroid solves problems above.
 **See <a href="http://anseki.github.io/overflow-android/">DEMO</a>**
 
 ## Usage
+
 [Hammer.js](http://hammerjs.github.io/) is required.
 
 ```html
@@ -161,29 +162,56 @@ OverflowAndroid.enable = true;
 ```
 
 ### `OverflowAndroid.friction`
-This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second. The default is `0.001`.
 
-### `OverflowAndroid.transition`
-If `true` is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. The default is `false`.  
-*NOTE:* This must be done before making an instance.
+Default: `0.001`
 
-The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... *Someone, please let me know the way.* (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
+This is strength of slowdown of inertia scroll after fast scroll operations. This is a number of pixels per milli second.
 
 ### `OverflowAndroid.fps`
-This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second. The default is `60`.  
+
+Default: `60`
+
+This is frame rate of animation of inertia scroll after fast scroll operations. This is a number of frames per second.  
 This is ignored when CSS Animations is used (see [`OverflowAndroid.transition`](#overflowandroidtransition)).
 
 ### `OverflowAndroid.cursorScrollable`
+
 Default: ![grab](grab.png)
 
 The CSS `cursor` value when the target element is not receiving scroll operations.  
 If `''` is specified, `cursor` is not changed.
 
 ### `OverflowAndroid.cursorScrolling`
+
 Default: ![grabbing](grabbing.png)
 
 The CSS `cursor` value when the target element is receiving scroll operations.  
 If `''` is specified, `cursor` is not changed.
+
+### `OverflowAndroid.scrollBar`
+
+Default: `true`
+
+Show scroll bars.
+
+### `OverflowAndroid.scrollBarWidth`
+
+Default: `5`
+
+Size of scroll bars. This is a number of pixels.
+
+### `OverflowAndroid.scrollBarColor`
+
+Default: `'rgba(0,0,0,0.5)'`
+
+Color of scroll bars.
+
+### `OverflowAndroid.transition`
+
+If `true` is specified to this option, the inertia scroll after fast scroll operations uses CSS Animations in modern browsers. The default is `false`.  
+*NOTE:* This must be done before making an instance.
+
+The CSS Animations work smoothly in many browsers, but some browsers (particularly Firefox for Android) are not. I tried many ways (e.g. hardware acceleration), but I found nothing yet... *Someone, please let me know the way.* (But Firefox for Android can't scroll smoothly normal `overflow:scroll` in the first place.)
 
 ## See Also
 
