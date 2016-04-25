@@ -743,6 +743,7 @@
     if (!overflowA.scrollMax[scrDir]) {
       this.maxValue = 0;
       this.elmBar.style.display = 'none';
+      this.elmBar.style[propOpacity] = '0';
       return this;
     }
     sizeBar = overflowA['client' + propCC] - SCROLL_BAR_MARGIN * 2 - OverflowAndroid.scrollBarWidth;
