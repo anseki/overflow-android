@@ -61,7 +61,8 @@
     positionTo, inertiaScroll, inertiaScrollStop,
     // CSS properties
     propTransform, propTrstProperty, propTrstDuration, propTrstTFunction, propOpacity,
-    animInitStyles, getStyleProp, setStyleValue, undoNativeScroll; // util methods
+    animInitStyles, trstTimer,
+    getStyleProp, setStyleValue, undoNativeScroll; // util methods
 
   // http://en.wikipedia.org/wiki/Cubic_function
   function getIntersections(p0, p1, p2, p3, a0, a1) {
@@ -259,13 +260,47 @@
     });
   }
 
+  function _inertiaScrollStop(that, e) {
+    var inertia = that.inertia, elmContent = that.elmContent,
+      matrix, position, styles = {};
+    window.clearTimeout(trstTimer);
+    if (inertia.isScrolling) {
+      if (!e) {
+        inertia.isScrolling = false;
+      } else if (e.propertyName === propTransform && e.target === elmContent) {
+        if (inertia.keyframes.length) {
+          setStyles(elmContent, inertia.keyframes.shift());
+        } else {
+          inertia.isScrolling = false;
+        }
+        e.stopPropagation();
+      }
+      if (!inertia.isScrolling) {
+        matrix = window.getComputedStyle(elmContent, '')[propTransform].match(/(-?[\d\.]+)/g);
+        if (matrix && matrix.length === 6) { // matrix(a, b, c, d, tx, ty)
+          position = {left: +matrix[4], top: +matrix[5]};
+          that.scrollValue.left = position2scrollValue(that, 'left', position);
+          that.scrollValue.top = position2scrollValue(that, 'top', position);
+          inertia.keyframes = [];
+          styles[propTrstDuration] = '0s'; // need 's'
+          styles[propTransform] =
+            'translate3d(' + position.left + 'px, ' + position.top + 'px, 0)';
+          setStyles(elmContent, styles);
+
+          if (OverflowAndroid.scrollBar) {
+            that.scrollBars.update();
+            that.scrollBars.hide(false);
+          }
+        }
+      }
+    }
+  }
+
   function _inertiaScroll(that) {
     var inertia = that.inertia,
       keyframes = {}, moveRs = [], // {N<moveR>: {S<axis>: N<scrollValue>}}
       timeLenAll, moveLenAll = {}, fixValue = {}, timeRLeft = 0,
       bezierRight = {p0: P_START, p1: P_START, p2: P2, p3: P_END};
-
-    if (OverflowAndroid.scrollBar) { that.scrollBars.hide(true); }
 
     inertia.keyframes = [];
     if (!inertia.x.velocity && !inertia.y.velocity) { return; }
@@ -309,6 +344,12 @@
     }
 
     if (moveRs.length) {
+      if (OverflowAndroid.scrollBar) { that.scrollBars.hide(true); }
+
+      // Sometimes, transition events are not fired.
+      window.clearTimeout(trstTimer);
+      trstTimer = window.setTimeout(function() { _inertiaScrollStop(that); }, timeLenAll);
+
       moveRs.sort(function(a, b) { return a - b; });
       moveRs.forEach(function(moveR) {
         var styles = {}, pointInt, scrollValue = {};
@@ -348,41 +389,6 @@
 
       setStyles(that.elmContent, inertia.keyframes.shift());
       inertia.isScrolling = true;
-    }
-  }
-
-  function _inertiaScrollStop(that, e) {
-    var inertia = that.inertia, elmContent = that.elmContent,
-      matrix, position, styles = {};
-    if (inertia.isScrolling) {
-      if (!e) {
-        inertia.isScrolling = false;
-      } else if (e.propertyName === propTransform && e.target === elmContent) {
-        if (inertia.keyframes.length) {
-          setStyles(elmContent, inertia.keyframes.shift());
-        } else {
-          inertia.isScrolling = false;
-        }
-        e.stopPropagation();
-      }
-      if (!inertia.isScrolling) {
-        matrix = window.getComputedStyle(elmContent, '')[propTransform].match(/(-?[\d\.]+)/g);
-        if (matrix && matrix.length === 6) { // matrix(a, b, c, d, tx, ty)
-          position = {left: +matrix[4], top: +matrix[5]};
-          that.scrollValue.left = position2scrollValue(that, 'left', position);
-          that.scrollValue.top = position2scrollValue(that, 'top', position);
-          inertia.keyframes = [];
-          styles[propTrstDuration] = '0s'; // need 's'
-          styles[propTransform] =
-            'translate3d(' + position.left + 'px, ' + position.top + 'px, 0)';
-          setStyles(elmContent, styles);
-
-          if (OverflowAndroid.scrollBar) {
-            that.scrollBars.update();
-            that.scrollBars.hide(false);
-          }
-        }
-      }
     }
   }
 
@@ -792,6 +798,7 @@
 
   ScrollBars.prototype.initSize = function() {
     if (this.v) {
+      window.clearTimeout(this.timer);
       this.v.initSize();
       this.h.initSize();
     }
@@ -799,58 +806,87 @@
   };
 
   ScrollBars.prototype.update = function() {
+    var barV, barH;
     if (this.v) {
-      this.v.update();
-      this.h.update();
+      barV = this.v;
+      barH = this.h;
+      if (barV.maxValue) { barV.update(); }
+      if (barH.maxValue) { barH.update(); }
     }
     return this;
   };
 
   ScrollBars.prototype.show = function(show) {
-    var that = this;
+    var that = this, barV, barH;
     if (that.v && show !== that.shown) {
-
       if (!that.hidden) {
         window.clearTimeout(that.timer);
-        if (show) {
-          that.v.elmBar.style.display = that.h.elmBar.style.display = 'block'; // before opacity
-          window.setTimeout(function() {
-            that.v.elmBar.style[propOpacity] = that.h.elmBar.style[propOpacity] = '1';
-          }, 0);
-        } else {
-          that.v.elmBar.style[propOpacity] = that.h.elmBar.style[propOpacity] = '0';
-          that.timer = window.setTimeout(function() {
-            that.v.elmBar.style.display = that.h.elmBar.style.display = 'none';
-          }, SCROLL_BAR_SHOW_DURATION);
+        barV = that.v;
+        barH = that.h;
+        if (barV.maxValue || barH.maxValue) {
+
+          if (show) {
+            // before change opacity
+            [barV, barH].forEach(function(bar) {
+              if (!bar.maxValue) { return; }
+              bar.elmBar.style.display = 'block';
+              bar.elmBar.offsetWidth; /* force reflow */ // eslint-disable-line no-unused-expressions
+            });
+            window.setTimeout(function() {
+              [barV, barH].forEach(function(bar) {
+                if (!bar.maxValue) { return; }
+                bar.elmBar.style[propOpacity] = '1';
+                bar.elmBar.offsetWidth; /* force reflow (for FF bug) */ // eslint-disable-line no-unused-expressions
+              });
+            }, 0);
+          } else {
+            if (barV.maxValue) { barV.elmBar.style[propOpacity] = '0'; }
+            if (barH.maxValue) { barH.elmBar.style[propOpacity] = '0'; }
+            that.timer = window.setTimeout(function() {
+              if (barV.maxValue) { barV.elmBar.style.display = 'none'; }
+              if (barH.maxValue) { barH.elmBar.style.display = 'none'; }
+            }, SCROLL_BAR_SHOW_DURATION);
+          }
+
         }
       }
-
       that.shown = show;
     }
     return that;
   };
 
   ScrollBars.prototype.hide = function(hide) {
-    var that = this;
+    var that = this, barV, barH;
     if (that.v && hide !== that.hidden) {
       window.clearTimeout(that.timer);
-      if (hide) {
-        that.v.elmBar.style.display = that.h.elmBar.style.display = 'none';
-      } else {
-        // switch immediately (reflow and re-change opacity for bug of FF)
-        [that.v.elmBar, that.h.elmBar].forEach(function(elmBar) {
-          elmBar.style[propTrstProperty] = 'none';
-          elmBar.offsetWidth; /* force reflow */ // eslint-disable-line no-unused-expressions
-          elmBar.style.display = 'block';
-          elmBar.style[propOpacity] = that.shown ? '0' : '1';
-        });
-        window.setTimeout(function() {
-          [that.v.elmBar, that.h.elmBar].forEach(function(elmBar) {
-            elmBar.style[propOpacity] = that.shown ? '1' : '0';
-            elmBar.offsetWidth; /* force reflow */ // eslint-disable-line no-unused-expressions
-            elmBar.style[propTrstProperty] = propOpacity;
+      barV = that.v;
+      barH = that.h;
+      if (barV.maxValue || barH.maxValue) {
+
+        if (hide) {
+          [barV, barH].forEach(function(bar) {
+            if (!bar.maxValue) { return; }
+            bar.elmBar.style.display = 'none';
+            bar.elmBar.style[propOpacity] = '0';
           });
-        }, 0);
+        } else {
+          // switch immediately
+          [barV, barH].forEach(function(bar) {
+            if (!bar.maxValue) { return; }
+            bar.elmBar.style[propTrstProperty] = 'none';
+            bar.elmBar.style.display = 'block';
+            bar.elmBar.offsetWidth; /* force reflow */ // eslint-disable-line no-unused-expressions
+          });
+          window.setTimeout(function() {
+            [barV, barH].forEach(function(bar) {
+              if (!bar.maxValue) { return; }
+              bar.elmBar.style[propOpacity] = that.shown ? '1' : '0';
+              bar.elmBar.offsetWidth; /* force reflow */ // eslint-disable-line no-unused-expressions
+              bar.elmBar.style[propTrstProperty] = propOpacity;
+            });
+          }, 50); // interval for bug of FF (`0` can't reflow)
+        }
+
       }
       that.hidden = hide;
     }
@@ -936,8 +972,7 @@
     if (inertiaScroll === _inertiaScroll) {
       ['transitionend', 'webkitTransitionEnd', 'msTransitionEnd',
         'MozTransitionEnd', 'oTransitionEnd'].forEach(function(type) {
-          elmContent.addEventListener(type,
-            function(e) { _inertiaScrollStop(that, e); }, false);
+          elmContent.addEventListener(type, function(e) { _inertiaScrollStop(that, e); }, false);
         });
       elmContent.style[propTrstProperty] = propTransform;
     }
