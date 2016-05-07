@@ -4,6 +4,8 @@ Implement the inertia scroll for `overflow` element. And the polyfill for `overf
 
 The desktop can implement UI that scrolls by mouse drag, inertia scroll like touch device. And problems of Android browser are solved.
 
+[![ss-01](ss-01.gif)](http://anseki.github.io/overflow-android/)
+
 Android browser has problems as below:
 
 - `overflow:scroll` and `overflow:auto` don't work on Android 2.x. The elements don't accept scroll operations (swipe, flick, drag, etc.).
