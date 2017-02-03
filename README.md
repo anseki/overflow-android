@@ -1,5 +1,7 @@
 # OverflowAndroid
 
+[![npm](https://img.shields.io/npm/v/overflowandroid.svg)](https://www.npmjs.com/package/overflowandroid) [![GitHub issues](https://img.shields.io/github/issues/anseki/overflow-android.svg)](https://github.com/anseki/overflow-android/issues) [![David](https://img.shields.io/david/anseki/overflow-android.svg)](package.json) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE-MIT)
+
 Implement the inertia scroll for `overflow` element. And the polyfill for `overflow:scroll` / `overflow:auto` and `element.scrollLeft` / `element.scrollTop` on Android browser.
 
 The desktop can implement UI that scrolls by mouse drag, inertia scroll like touch device. And problems of Android browser are solved.
